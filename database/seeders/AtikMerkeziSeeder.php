@@ -6,6 +6,7 @@ use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use League\Csv\Reader;
 use League\Csv\Statement;
+use App\Models\AtikMerkezi;
 
 class AtikMerkeziSeeder extends Seeder
 {
@@ -31,13 +32,11 @@ class AtikMerkeziSeeder extends Seeder
                 $cleanRecord[$cleanKey] = $value;
             }
 
-            DB::table('atik_merkezleri')->insert([
-                'title'      => $cleanRecord['Title'] ?? null,
-                'content'    => $cleanRecord['Content'] ?? null,
-                'lat'        => $cleanRecord['Lat'] ?? null,
-                'lon'        => $cleanRecord['Lon'] ?? null,
-                'created_at' => now(),
-                'updated_at' => now(),
+            AtikMerkezi::create([
+                'title'   => $cleanRecord['Title'] ?? null,
+                'content' => $cleanRecord['Content'] ?? null,
+                'lat'     => $cleanRecord['Lat'] ?? null,
+                'lon'     => $cleanRecord['Lon'] ?? null,
             ]);
         }
 

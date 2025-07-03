@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class AtikMerkezi extends Model
 {
-    // Tablo adı (varsayılan model adı kebab-case değilse belirt)
+    // Tablo adı 
     protected $table = 'atik_merkezleri';
 
     // Toplu atama yapılacak sütunlar
