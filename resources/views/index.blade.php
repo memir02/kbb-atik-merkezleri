@@ -6,6 +6,7 @@
     <link rel="stylesheet" href="{{ asset('css/style.css') }}">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@400&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         body {
             font-family: 'Roboto Slab', Arial, sans-serif;
@@ -82,6 +83,46 @@
                 opacity: 1;
             }
         }
+
+        /* Seçilebilir card stilleri */
+        .selectable-card {
+            transition: all 0.3s ease;
+        }
+
+        .selectable-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        .selectable-card.selected {
+            border-color: #198754 !important;
+            background-color: #f8fff9;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(25, 135, 84, 0.2);
+        }
+
+        .merkez-checkbox {
+            z-index: 10;
+        }
+
+        .map-button-container {
+            z-index: 5;
+        }
+
+        .haritada-goster-btn {
+            animation: slideInRight 0.3s ease-out;
+        }
+
+        @keyframes slideInRight {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
     </style>
 </head>
 <body>
@@ -96,15 +137,33 @@
 </header>
 @if(isset($merkezler) && $merkezler->count())
     <div class="container mt-4">
-        <h4>Filtrelenmiş Sonuçlar</h4>
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h4>Filtrelenmiş Sonuçlar</h4>
+            <div class="d-flex align-items-center gap-3">
+                <div id="selectedCount" class="badge bg-primary" style="display: none;">
+                    <span id="countText">0</span> seçildi
+                </div>
+                <button id="showSelectedOnMap" class="btn btn-success btn-sm" style="display: none;">
+                    <i class="fas fa-map-marked-alt me-1"></i> Seçilenleri Haritada Göster
+                </button>
+            </div>
+        </div>
         <div class="row row-cols-1 row-cols-md-2 g-4">
             @foreach($merkezler as $merkez)
                 <div class="col">
-                    <div class="card border-primary h-100">
+                    <div class="card border-primary h-100 selectable-card position-relative" data-merkez-id="{{ $merkez->id }}" style="cursor: pointer; transition: all 0.3s ease;">
                         <div class="card-body">
-                            <h5 class="card-title">{{ $merkez->title }}</h5>
+                            <div class="form-check position-absolute" style="top: 10px; right: 10px;">
+                                <input class="form-check-input merkez-checkbox" type="checkbox" id="merkez-{{ $merkez->id }}" data-merkez-id="{{ $merkez->id }}">
+                            </div>
+                            <h5 class="card-title pe-5">{{ $merkez->title }}</h5>
                             <p class="card-text">{{ $merkez->content }}</p>
-                            <small>Adres: {{ $merkez->adres }}</small>
+                            <small class="text-muted">Adres: {{ $merkez->adres }}</small>
+                        </div>
+                        <div class="map-button-container position-absolute" style="bottom: 10px; right: 10px; display: none;">
+                            <button class="btn btn-success btn-sm haritada-goster-btn" data-merkez-id="{{ $merkez->id }}">
+                                <i class="fas fa-map-marker-alt me-1"></i> Haritada Göster
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -240,7 +299,7 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
     // Basit filtreleme (sadece frontend)
-    document.getElementById('contentFilter').addEventListener('change', function() {
+    document.getElementById('contentFilter')?.addEventListener('change', function() {
         var value = this.value;
         var merkezler = document.querySelectorAll('.merkez');
         merkezler.forEach(function(merkez) {
@@ -250,6 +309,125 @@
                 merkez.style.display = 'none';
             }
         });
+    });
+
+    // Seçilebilir card fonksiyonları
+    document.addEventListener('DOMContentLoaded', function() {
+        const cards = document.querySelectorAll('.selectable-card');
+        const checkboxes = document.querySelectorAll('.merkez-checkbox');
+        const selectedCount = document.getElementById('selectedCount');
+        const countText = document.getElementById('countText');
+        const showSelectedOnMapBtn = document.getElementById('showSelectedOnMap');
+
+        // Card tıklama olayları
+        cards.forEach(card => {
+            card.addEventListener('click', function(e) {
+                // Checkbox'a veya butona tıklanmışsa card'ı seçme
+                if (e.target.classList.contains('merkez-checkbox') || 
+                    e.target.classList.contains('haritada-goster-btn') ||
+                    e.target.closest('.haritada-goster-btn')) {
+                    return;
+                }
+
+                const checkbox = this.querySelector('.merkez-checkbox');
+                checkbox.checked = !checkbox.checked;
+                updateCardSelection(this, checkbox.checked);
+                updateSelectedCount();
+            });
+        });
+
+        // Checkbox değişim olayları
+        checkboxes.forEach(checkbox => {
+            checkbox.addEventListener('change', function(e) {
+                e.stopPropagation();
+                const card = this.closest('.selectable-card');
+                updateCardSelection(card, this.checked);
+                updateSelectedCount();
+            });
+        });
+
+        // Haritada göster buton olayları
+        document.querySelectorAll('.haritada-goster-btn').forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                const merkezId = this.getAttribute('data-merkez-id');
+                showOnMap(merkezId);
+            });
+        });
+
+        // Seçilenleri haritada göster butonu
+        showSelectedOnMapBtn?.addEventListener('click', function() {
+            const selectedMerkezIds = getSelectedMerkezIds();
+            if (selectedMerkezIds.length > 0) {
+                showMultipleOnMap(selectedMerkezIds);
+            }
+        });
+
+        function updateCardSelection(card, isSelected) {
+            const mapButtonContainer = card.querySelector('.map-button-container');
+            
+            if (isSelected) {
+                card.classList.add('selected');
+                mapButtonContainer.style.display = 'block';
+            } else {
+                card.classList.remove('selected');
+                mapButtonContainer.style.display = 'none';
+            }
+        }
+
+        function updateSelectedCount() {
+            const selectedCheckboxes = document.querySelectorAll('.merkez-checkbox:checked');
+            const count = selectedCheckboxes.length;
+            
+            if (count > 0) {
+                countText.textContent = count;
+                selectedCount.style.display = 'block';
+                
+                // Birden fazla merkez seçilmişse "Seçilenleri Haritada Göster" butonunu göster
+                if (count > 1) {
+                    showSelectedOnMapBtn.style.display = 'block';
+                } else {
+                    showSelectedOnMapBtn.style.display = 'none';
+                }
+            } else {
+                selectedCount.style.display = 'none';
+                showSelectedOnMapBtn.style.display = 'none';
+            }
+        }
+
+        function getSelectedMerkezIds() {
+            const selectedCheckboxes = document.querySelectorAll('.merkez-checkbox:checked');
+            return Array.from(selectedCheckboxes).map(checkbox => checkbox.getAttribute('data-merkez-id'));
+        }
+
+        function showOnMap(merkezId) {
+            // Bu fonksiyon harita entegrasyonu için kullanılacak
+            // Şimdilik basit bir alert gösteriyoruz
+            alert(`Merkez ID: ${merkezId} haritada gösterilecek.\n\nBurada Google Maps, OpenStreetMap veya başka bir harita servisi entegrasyonu yapılabilir.`);
+            
+            // Örnek: Google Maps'e yönlendirme
+            // const merkez = getMerkezData(merkezId); // Backend'den merkez bilgilerini al
+            // const googleMapsUrl = `https://www.google.com/maps/search/?api=1&query=${merkez.lat},${merkez.lng}`;
+            // window.open(googleMapsUrl, '_blank');
+        }
+
+        function showMultipleOnMap(merkezIds) {
+            // Bu fonksiyon birden fazla merkezi haritada göstermek için kullanılacak
+            // Şimdilik seçili merkez ID'lerini gösteriyoruz
+            const merkezCount = merkezIds.length;
+            alert(`${merkezCount} adet seçili merkez haritada gösterilecek.\n\nMerkez ID'leri: ${merkezIds.join(', ')}\n\nBurada Google Maps, OpenStreetMap veya başka bir harita servisi ile birden fazla konumu gösterebilirsiniz.`);
+            
+            // Örnek: Google Maps'te birden fazla noktayı gösterme
+            // const merkezler = getMerkezlerData(merkezIds); // Backend'den merkez bilgilerini al
+            // const waypoints = merkezler.map(m => `${m.lat},${m.lng}`).join('|');
+            // const googleMapsUrl = `https://www.google.com/maps/dir/?api=1&waypoints=${waypoints}`;
+            // window.open(googleMapsUrl, '_blank');
+            
+            // Alternatif: Tüm konumları kapsayan alan gösterme
+            // const bounds = calculateBounds(merkezler);
+            // const googleMapsUrl = `https://www.google.com/maps/@${bounds.center.lat},${bounds.center.lng},${bounds.zoom}z`;
+            // window.open(googleMapsUrl, '_blank');
+        }
     });
     </script>
 </body>
