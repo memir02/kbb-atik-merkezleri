@@ -48,4 +48,34 @@ class AtikMerkeziController extends Controller
 
         return $searchTerms[$filterValue] ?? $filterValue;
     }
+
+    /**
+     * API: Tek merkez bilgisi getir
+     */
+    public function getMerkez($id)
+    {
+        $merkez = AtikMerkezi::find($id);
+        
+        if (!$merkez) {
+            return response()->json(['error' => 'Merkez bulunamadı'], 404);
+        }
+        
+        return response()->json($merkez);
+    }
+
+    /**
+     * API: Birden fazla merkez bilgisi getir
+     */
+    public function getMerkezler(Request $request)
+    {
+        $ids = $request->input('ids', []);
+        
+        if (empty($ids)) {
+            return response()->json(['error' => 'Merkez ID\'leri belirtilmedi'], 400);
+        }
+        
+        $merkezler = AtikMerkezi::whereIn('id', $ids)->get();
+        
+        return response()->json($merkezler);
+    }
 }
