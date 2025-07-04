@@ -104,7 +104,7 @@
                         <div class="card-body">
                             <h5 class="card-title">{{ $merkez->title }}</h5>
                             <p class="card-text">{{ $merkez->content }}</p>
-                            <small>Konum: {{ $merkez->lat }}, {{ $merkez->lon }}</small>
+                            <small>Adres: {{ $merkez->adres }}</small>
                         </div>
                     </div>
                 </div>
