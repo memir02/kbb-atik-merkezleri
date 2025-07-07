@@ -11,8 +11,9 @@ class AtikMerkeziController extends Controller
     public function index(Request $request)
     {
         $merkezler = null;
+        $tumMerkezler = null;
 
-        // Sadece filtre seçilmişse veri getir
+        // Sadece filtre seçilmişse filtrelenmiş veri getir
         if ($request->has('filter') && is_array($request->filter)) {
             $query = AtikMerkezi::query();
             $query->where(function ($q) use ($request) {
@@ -23,10 +24,13 @@ class AtikMerkeziController extends Controller
                 }
             });
             $merkezler = $query->get();
+        } else {
+            // Ana sayfa için ilk 20 merkezi getir
+            $tumMerkezler = AtikMerkezi::take(20)->get();
         }
 
         // index.blade.php sayfasına verileri gönder
-        return view('index', compact('merkezler'));
+        return view('index', compact('merkezler', 'tumMerkezler'));
     }
 
     /**
@@ -77,5 +81,21 @@ class AtikMerkeziController extends Controller
         $merkezler = AtikMerkezi::whereIn('id', $ids)->get();
         
         return response()->json($merkezler);
+    }
+
+    /**
+     * API: Infinite scroll için daha fazla merkez getir
+     */
+    public function loadMore(Request $request)
+    {
+        $offset = $request->input('offset', 0);
+        $limit = 20;
+
+        $merkezler = AtikMerkezi::skip($offset)->take($limit)->get();
+
+        return response()->json([
+            'merkezler' => $merkezler,
+            'hasMore' => AtikMerkezi::count() > ($offset + $limit)
+        ]);
     }
 }

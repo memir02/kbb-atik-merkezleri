@@ -127,6 +127,26 @@
                 opacity: 1;
             }
         }
+
+        /* Daha Fazla Yükle butonu stilleri */
+        #loadMoreBtn {
+            transition: all 0.3s ease;
+            border-width: 2px;
+            padding: 12px 30px;
+            font-weight: 500;
+        }
+
+        #loadMoreBtn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0, 123, 255, 0.3);
+            background-color: #007bff;
+            color: white;
+            border-color: #007bff;
+        }
+
+        #loadMoreBtn:active {
+            transform: translateY(0);
+        }
     </style>
 </head>
 <body>
@@ -136,7 +156,12 @@
             <img src="{{ asset('images/bs-logo.png') }}" alt="Benim Şehrim Logosu" style="height:60px; object-fit:contain; cursor:pointer;" onclick="window.open('https://www.konya.bel.tr', '_blank')">
             <img src="{{ asset('images/kbb-logo.png') }}" alt="Konya BB Logosu" style="height:60px; object-fit:contain; cursor:pointer;" onclick="window.open('https://www.konya.bel.tr', '_blank')">
         </div>
-        <h1 class="h4 m-0 text-center">Konya Büyükşehir Belediyesi Atık Merkezleri</h1>
+        <h1>
+  <a href="{{ url('/') }}" style="color: inherit; text-decoration: none;">
+    Konya Büyükşehir Belediyesi Atık Merkezleri
+  </a>
+</h1>
+
     </div>
 </header>
 @if(isset($merkezler) && $merkezler->count())
@@ -144,6 +169,9 @@
         <div class="d-flex justify-content-between align-items-center mb-3">
             <h4>Filtrelenmiş Sonuçlar</h4>
             <div class="d-flex align-items-center gap-3">
+                <button id="clearFilteredSelection" class="btn btn-outline-danger btn-sm" style="display: none;">
+                    <i class="fas fa-times me-1"></i> Seçilenleri Temizle
+                </button>
                 <div id="selectedCount" class="badge bg-primary" style="display: none;">
                     <span id="countText">0</span> seçildi
                 </div>
@@ -195,6 +223,66 @@
         </div>
     </div>
 </div>
+
+@if(isset($tumMerkezler) && $tumMerkezler->count())
+    <div class="container mt-4">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h4>Tüm Atık Merkezleri</h4>
+            <div class="d-flex align-items-center gap-3">
+                <button id="clearAllSelection" class="btn btn-outline-danger btn-sm" style="display: none;">
+                    <i class="fas fa-times me-1"></i> Seçilenleri Temizle
+                </button>
+                <div id="allSelectedCount" class="badge bg-primary" style="display: none;">
+                    <span id="allCountText">0</span> seçildi
+                </div>
+                <button id="showAllSelectedOnMap" class="btn btn-success btn-sm" style="display: none;">
+                    <i class="fas fa-map-marked-alt me-1"></i> Seçilenleri Haritada Göster
+                </button>
+            </div>
+        </div>
+        <div id="allMerkezlerContainer" class="row row-cols-1 row-cols-md-2 g-4">
+            @foreach($tumMerkezler as $merkez)
+                <div class="col">
+                    <div class="card border-primary h-100 selectable-card position-relative" data-merkez-id="{{ $merkez->id }}" style="cursor: pointer; transition: all 0.3s ease;">
+                        <div class="card-body">
+                            <div class="form-check position-absolute" style="top: 10px; right: 10px;">
+                                <input class="form-check-input all-merkez-checkbox" type="checkbox" id="all-merkez-{{ $merkez->id }}" data-merkez-id="{{ $merkez->id }}">
+                            </div>
+                            <h5 class="card-title pe-5">{{ $merkez->title }}</h5>
+                            <p class="card-text">{{ $merkez->content }}</p>
+                            <small class="text-muted">Adres: {{ $merkez->adres }}</small>
+                        </div>
+                        <div class="map-button-container position-absolute" style="bottom: 10px; right: 10px; display: none;">
+                            <button class="btn btn-success btn-sm haritada-goster-btn" data-merkez-id="{{ $merkez->id }}">
+                                <i class="fas fa-map-marker-alt me-1"></i> Haritada Göster
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            @endforeach
+        </div>
+        
+        <!-- Daha Fazla Yükle Buttonu -->
+        <div id="loadMoreContainer" class="text-center mt-4">
+            <button id="loadMoreBtn" class="btn btn-outline-primary btn-lg">
+                <i class="fas fa-plus-circle me-2"></i>Daha Fazla Merkez Yükle
+            </button>
+        </div>
+        
+        <!-- Loading indicator -->
+        <div id="loadingIndicator" class="text-center mt-4" style="display: none;">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Yükleniyor...</span>
+            </div>
+            <p class="mt-2">Daha fazla merkez yükleniyor...</p>
+        </div>
+        
+        <!-- End of data message -->
+        <div id="endOfData" class="text-center mt-4" style="display: none;">
+            <p class="text-muted">Tüm atık merkezleri yüklendi.</p>
+        </div>
+    </div>
+@endif
 
 <!-- Filtreleme Modalı -->
 <div class="modal fade" id="filtreModal" tabindex="-1" aria-labelledby="filtreModalLabel" aria-hidden="true">
@@ -429,10 +517,12 @@
         function updateSelectedCount() {
             const selectedCheckboxes = document.querySelectorAll('.merkez-checkbox:checked');
             const count = selectedCheckboxes.length;
+            const clearFilteredBtn = document.getElementById('clearFilteredSelection');
             
             if (count > 0) {
                 countText.textContent = count;
                 selectedCount.style.display = 'block';
+                clearFilteredBtn.style.display = 'block';
                 
                 // Birden fazla merkez seçilmişse "Seçilenleri Haritada Göster" butonunu göster
                 if (count > 1) {
@@ -443,12 +533,172 @@
             } else {
                 selectedCount.style.display = 'none';
                 showSelectedOnMapBtn.style.display = 'none';
+                clearFilteredBtn.style.display = 'none';
             }
         }
 
         function getSelectedMerkezIds() {
             const selectedCheckboxes = document.querySelectorAll('.merkez-checkbox:checked');
             return Array.from(selectedCheckboxes).map(checkbox => checkbox.getAttribute('data-merkez-id'));
+        }
+
+        // Tüm merkezler için seçim fonksiyonları
+        function getAllSelectedMerkezIds() {
+            const selectedCheckboxes = document.querySelectorAll('.all-merkez-checkbox:checked');
+            return Array.from(selectedCheckboxes).map(checkbox => checkbox.getAttribute('data-merkez-id'));
+        }
+
+        function updateAllSelectedCount() {
+            const selectedCheckboxes = document.querySelectorAll('.all-merkez-checkbox:checked');
+            const count = selectedCheckboxes.length;
+            const allSelectedCount = document.getElementById('allSelectedCount');
+            const allCountText = document.getElementById('allCountText');
+            const showAllSelectedOnMapBtn = document.getElementById('showAllSelectedOnMap');
+            const clearAllBtn = document.getElementById('clearAllSelection');
+            
+            if (count > 0) {
+                allCountText.textContent = count;
+                allSelectedCount.style.display = 'block';
+                clearAllBtn.style.display = 'block';
+                
+                if (count > 1) {
+                    showAllSelectedOnMapBtn.style.display = 'block';
+                } else {
+                    showAllSelectedOnMapBtn.style.display = 'none';
+                }
+            } else {
+                allSelectedCount.style.display = 'none';
+                showAllSelectedOnMapBtn.style.display = 'none';
+                clearAllBtn.style.display = 'none';
+            }
+        }
+
+        function updateAllCardSelection(card, isSelected) {
+            const mapButtonContainer = card.querySelector('.map-button-container');
+            
+            if (isSelected) {
+                card.classList.add('selected');
+                mapButtonContainer.style.display = 'block';
+            } else {
+                card.classList.remove('selected');
+                mapButtonContainer.style.display = 'none';
+            }
+        }
+
+        // Yeni yüklenen kartlar için event listener'ları ekle
+        function attachEventListenersToNewCards(container) {
+            const newCards = container.querySelectorAll('.selectable-card');
+            const newCheckboxes = container.querySelectorAll('.all-merkez-checkbox');
+            const newButtons = container.querySelectorAll('.haritada-goster-btn');
+
+            newCards.forEach(card => {
+                card.addEventListener('click', function(e) {
+                    if (e.target.classList.contains('all-merkez-checkbox') || 
+                        e.target.classList.contains('haritada-goster-btn') ||
+                        e.target.closest('.haritada-goster-btn')) {
+                        return;
+                    }
+
+                    const checkbox = this.querySelector('.all-merkez-checkbox');
+                    checkbox.checked = !checkbox.checked;
+                    updateAllCardSelection(this, checkbox.checked);
+                    updateAllSelectedCount();
+                });
+            });
+
+            newCheckboxes.forEach(checkbox => {
+                checkbox.addEventListener('change', function(e) {
+                    e.stopPropagation();
+                    const card = this.closest('.selectable-card');
+                    updateAllCardSelection(card, this.checked);
+                    updateAllSelectedCount();
+                });
+            });
+
+            newButtons.forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    const merkezId = this.getAttribute('data-merkez-id');
+                    showOnMap(merkezId);
+                });
+            });
+        }
+
+        // Tüm merkezler için başlangıç event listener'ları
+        const allCards = document.querySelectorAll('#allMerkezlerContainer .selectable-card');
+        const allCheckboxes = document.querySelectorAll('.all-merkez-checkbox');
+        
+        allCards.forEach(card => {
+            card.addEventListener('click', function(e) {
+                if (e.target.classList.contains('all-merkez-checkbox') || 
+                    e.target.classList.contains('haritada-goster-btn') ||
+                    e.target.closest('.haritada-goster-btn')) {
+                    return;
+                }
+
+                const checkbox = this.querySelector('.all-merkez-checkbox');
+                checkbox.checked = !checkbox.checked;
+                updateAllCardSelection(this, checkbox.checked);
+                updateAllSelectedCount();
+            });
+        });
+
+        allCheckboxes.forEach(checkbox => {
+            checkbox.addEventListener('change', function(e) {
+                e.stopPropagation();
+                const card = this.closest('.selectable-card');
+                updateAllCardSelection(card, this.checked);
+                updateAllSelectedCount();
+            });
+        });
+
+        // Tüm seçilenleri haritada göster butonu
+        document.getElementById('showAllSelectedOnMap')?.addEventListener('click', function() {
+            const selectedMerkezIds = getAllSelectedMerkezIds();
+            if (selectedMerkezIds.length > 0) {
+                showMultipleOnMap(selectedMerkezIds);
+            }
+        });
+
+        // Filtrelenmiş sonuçları temizle butonu
+        document.getElementById('clearFilteredSelection')?.addEventListener('click', function() {
+            clearFilteredSelection();
+        });
+
+        // Tüm merkezleri temizle butonu
+        document.getElementById('clearAllSelection')?.addEventListener('click', function() {
+            clearAllSelection();
+        });
+
+        // Seçilenleri haritada göster butonu (filtrelenmiş)
+        showSelectedOnMapBtn?.addEventListener('click', function() {
+            const selectedMerkezIds = getSelectedMerkezIds();
+            if (selectedMerkezIds.length > 0) {
+                showMultipleOnMap(selectedMerkezIds);
+            }
+        });
+
+        // Temizleme fonksiyonları
+        function clearFilteredSelection() {
+            // Tüm filtrelenmiş checkboxları temizle
+            const checkboxes = document.querySelectorAll('.merkez-checkbox:checked');
+            checkboxes.forEach(checkbox => {
+                checkbox.checked = false;
+                const card = checkbox.closest('.selectable-card');
+                updateCardSelection(card, false);
+            });
+            updateSelectedCount();
+        }
+
+        function clearAllSelection() {
+            // Tüm merkez checkboxlarını temizle
+            const checkboxes = document.querySelectorAll('.all-merkez-checkbox:checked');
+            checkboxes.forEach(checkbox => {
+                checkbox.checked = false;
+                const card = checkbox.closest('.selectable-card');
+                updateAllCardSelection(card, false);
+            });
+            updateAllSelectedCount();
         }
 
         function showOnMap(merkezId) {
@@ -467,7 +717,8 @@
                     }
                     
                     // Harita modalını aç
-                    const mapModal = new bootstrap.Modal(document.getElementById('mapModal'));
+                    const mapModalElement = document.getElementById('mapModal');
+                    const mapModal = bootstrap.Modal.getOrCreateInstance(mapModalElement);
                     document.getElementById('mapModalLabel').innerHTML = 
                         `<i class="fas fa-map-marker-alt me-2"></i>${merkez.title}`;
                     mapModal.show();
@@ -523,7 +774,8 @@
                 }
                 
                 // Harita modalını aç
-                const mapModal = new bootstrap.Modal(document.getElementById('mapModal'));
+                const mapModalElement = document.getElementById('mapModal');
+                const mapModal = bootstrap.Modal.getOrCreateInstance(mapModalElement);
                 document.getElementById('mapModalLabel').innerHTML = 
                     `<i class="fas fa-map-marked-alt me-2"></i>Seçili Atık Merkezleri (${validMerkezler.length})`;
                 mapModal.show();
@@ -563,6 +815,139 @@
             .catch(error => {
                 console.error('Merkez bilgileri alınamadı:', error);
                 alert('Merkez bilgileri yüklenirken hata oluştu.');
+            });
+        }
+
+        // Harita modalı kapatıldığında temizleme işlemleri
+        const mapModal = document.getElementById('mapModal');
+        if (mapModal) {
+            // Modal tamamen kapandığında
+            mapModal.addEventListener('hidden.bs.modal', function () {
+                // Backdrop'u manuel olarak kaldır
+                setTimeout(() => {
+                    const backdrops = document.querySelectorAll('.modal-backdrop');
+                    backdrops.forEach(backdrop => backdrop.remove());
+                    
+                    // Body'den modal class'larını kaldır
+                    document.body.classList.remove('modal-open');
+                    document.body.style.overflow = '';
+                    document.body.style.paddingRight = '';
+                }, 100);
+                
+                // URL'de filtre parametresi varsa ana sayfaya dön
+                const urlParams = new URLSearchParams(window.location.search);
+                if (urlParams.has('filter')) {
+                    // URL'den filtre parametrelerini temizle ve sayfayı yenile
+                    const url = new URL(window.location);
+                    url.searchParams.delete('filter');
+                    window.location.href = url.toString();
+                } else {
+                    // Sadece seçimleri temizle
+                    if (typeof clearAllSelection === 'function') {
+                        clearAllSelection();
+                    }
+                    if (typeof clearFilteredSelection === 'function') {
+                        clearFilteredSelection();
+                    }
+                }
+                
+                // Haritayı temizle
+                if (map) {
+                    clearMarkers();
+                }
+            });
+            
+            // Modal kapanmaya başladığında da temizle
+            mapModal.addEventListener('hide.bs.modal', function () {
+                // Haritayı hemen temizle
+                if (map) {
+                    clearMarkers();
+                }
+            });
+        }
+
+        // Infinite Scroll İmplementasyonu
+        let isLoading = false;
+        let hasMoreData = true;
+        let currentOffset = 20; // İlk 20 zaten yüklendi
+
+        function loadMoreMerkezler() {
+            if (isLoading || !hasMoreData) return;
+
+            isLoading = true;
+            
+            // Butonu gizle, loading indicator'ı göster
+            const loadMoreBtn = document.getElementById('loadMoreBtn');
+            const loadMoreContainer = document.getElementById('loadMoreContainer');
+            const loadingIndicator = document.getElementById('loadingIndicator');
+            
+            if (loadMoreContainer) loadMoreContainer.style.display = 'none';
+            if (loadingIndicator) loadingIndicator.style.display = 'block';
+
+            fetch(`/api/load-more?offset=${currentOffset}`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Veriler yüklenemedi');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    const container = document.getElementById('allMerkezlerContainer');
+                    
+                    data.merkezler.forEach(merkez => {
+                        const colDiv = document.createElement('div');
+                        colDiv.className = 'col';
+                        colDiv.innerHTML = `
+                            <div class="card border-primary h-100 selectable-card position-relative" data-merkez-id="${merkez.id}" style="cursor: pointer; transition: all 0.3s ease;">
+                                <div class="card-body">
+                                    <div class="form-check position-absolute" style="top: 10px; right: 10px;">
+                                        <input class="form-check-input all-merkez-checkbox" type="checkbox" id="all-merkez-${merkez.id}" data-merkez-id="${merkez.id}">
+                                    </div>
+                                    <h5 class="card-title pe-5">${merkez.title}</h5>
+                                    <p class="card-text">${merkez.content}</p>
+                                    <small class="text-muted">Adres: ${merkez.adres}</small>
+                                </div>
+                                <div class="map-button-container position-absolute" style="bottom: 10px; right: 10px; display: none;">
+                                    <button class="btn btn-success btn-sm haritada-goster-btn" data-merkez-id="${merkez.id}">
+                                        <i class="fas fa-map-marker-alt me-1"></i> Haritada Göster
+                                    </button>
+                                </div>
+                            </div>
+                        `;
+                        container.appendChild(colDiv);
+                    });
+
+                    // Yeni kartlara event listener'ları ekle
+                    attachEventListenersToNewCards(container);
+
+                    currentOffset += 20;
+                    hasMoreData = data.hasMore;
+
+                    if (!hasMoreData) {
+                        // Tüm merkezler yüklendi, buton yerine bitiş mesajını göster
+                        document.getElementById('endOfData').style.display = 'block';
+                    } else {
+                        // Hala daha fazla veri var, butonu tekrar göster
+                        if (loadMoreContainer) loadMoreContainer.style.display = 'block';
+                    }
+                })
+                .catch(error => {
+                    console.error('Veri yükleme hatası:', error);
+                    alert('Daha fazla merkez yüklenirken hata oluştu.');
+                    // Hata durumunda butonu tekrar göster
+                    if (loadMoreContainer) loadMoreContainer.style.display = 'block';
+                })
+                .finally(() => {
+                    isLoading = false;
+                    if (loadingIndicator) loadingIndicator.style.display = 'none';
+                });
+        }
+
+        // "Daha Fazla Yükle" buton event listener
+        const loadMoreBtn = document.getElementById('loadMoreBtn');
+        if (loadMoreBtn) {
+            loadMoreBtn.addEventListener('click', function() {
+                loadMoreMerkezler();
             });
         }
     });

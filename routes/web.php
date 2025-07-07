@@ -9,4 +9,5 @@ Route::get('/', [AtikMerkeziController::class, 'index'])->name('atik-merkezleri.
 Route::prefix('api')->group(function () {
     Route::get('/merkez/{id}', [AtikMerkeziController::class, 'getMerkez']);
     Route::post('/merkezler', [AtikMerkeziController::class, 'getMerkezler']);
+    Route::get('/load-more', [AtikMerkeziController::class, 'loadMore']);
 });
