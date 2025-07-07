@@ -12,9 +12,15 @@ class AtikMerkeziController extends Controller
     {
         $merkezler = null;
         $tumMerkezler = null;
+        $searchTerm = null;
 
-        // Sadece filtre seçilmişse filtrelenmiş veri getir
-        if ($request->has('filter') && is_array($request->filter)) {
+        // Önce arama kontrol et
+        if ($request->has('search') && !empty($request->search)) {
+            $searchTerm = $request->search;
+            $merkezler = $this->searchMerkezler($searchTerm);
+        }
+        // Arama yoksa filtre kontrol et
+        elseif ($request->has('filter') && is_array($request->filter)) {
             $query = AtikMerkezi::query();
             $query->where(function ($q) use ($request) {
                 foreach ($request->filter as $type) {
@@ -30,7 +36,54 @@ class AtikMerkeziController extends Controller
         }
 
         // index.blade.php sayfasına verileri gönder
-        return view('index', compact('merkezler', 'tumMerkezler'));
+        return view('index', compact('merkezler', 'tumMerkezler', 'searchTerm'));
+    }
+
+    /**
+     * Adres bazlı akıllı arama yapar
+     */
+    private function searchMerkezler($searchTerm)
+    {
+        // Anlamsız kelimeleri filtrele
+        $stopWords = [
+            'mahallesi', 'mahalle', 'mah', 'mh',
+            'caddesi', 'cadde', 'cad', 'cd', 
+            'sokağı', 'sokak', 'sok', 'sk',
+            'bulvarı', 'bulvar', 'blv',
+            'yolu', 'yol',
+            'meydanı', 'meydan',
+            've', 'ile', 'da', 'de', 'ta', 'te'
+        ];
+        
+        // Kelimeyi parçala ve temizle
+        $words = explode(' ', strtolower(trim($searchTerm)));
+        $meaningfulWords = array_filter($words, function($word) use ($stopWords) {
+            $word = trim($word);
+            return !empty($word) && 
+                   strlen($word) > 2 && 
+                   !in_array($word, $stopWords);
+        });
+        
+        if (empty($meaningfulWords)) {
+            return collect(); // Boş sonuç döndür
+        }
+        
+        // Anlamlı kelimelerle arama yap
+        $query = AtikMerkezi::query();
+        $query->where(function ($q) use ($meaningfulWords) {
+            foreach ($meaningfulWords as $word) {
+                $q->where('adres', 'like', '%' . $word . '%');
+            }
+        });
+        
+        // Title'da da ara (opsiyonel olarak)
+        $query->orWhere(function ($q) use ($meaningfulWords) {
+            foreach ($meaningfulWords as $word) {
+                $q->where('title', 'like', '%' . $word . '%');
+            }
+        });
+        
+        return $query->get();
     }
 
     /**
