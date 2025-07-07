@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AtikMerkeziController;
 
 Route::get('/', [AtikMerkeziController::class, 'index'])->name('atik-merkezleri.index');
+Route::get('/konuma-gore', [AtikMerkeziController::class, 'konumaGore'])->name('atik-merkezleri.konuma-gore');
 
 // API Routes for map integration
 Route::prefix('api')->group(function () {

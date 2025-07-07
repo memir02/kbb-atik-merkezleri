@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Konya Büyükşehir Belediyesi Atık Merkezleri</title>
-    <link rel="stylesheet" href="{{ asset('css/style.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/atik-merkezleri.css') }}">
     <link rel="icon" href="{{ asset('favicon.png') }}" type="image/png">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@400&display=swap" rel="stylesheet">
@@ -66,7 +66,7 @@
                             data-bs-target="#filtreModal">
                         <i class="fas fa-filter me-1"></i> FİLTRELE
                     </button>
-                    <button type="button" class="btn btn-success btn-lg">
+                    <button type="button" id="konuma-gore-ara" class="btn btn-success btn-lg">
                         <i class="fas fa-location-arrow me-1"></i> KONUMUMA GÖRE BUL
                     </button>
                     @if(request('filter'))
@@ -80,9 +80,86 @@
     </div>
 </div>
 
+<!-- Konuma Göre Sonuçlar -->
+@if(isset($isLocationSearch) && $isLocationSearch && isset($merkezler))
+    <div class="container mt-4 mb-5" data-user-location data-user-lat="{{ $userLat }}" data-user-lon="{{ $userLon }}">
+        @if($merkezler->count() > 0)
+            <div class="alert alert-success">
+                <div class="d-flex align-items-center mb-2">
+                    <i class="fas fa-map-marker-alt text-success me-2"></i>
+                    <strong>Konumunuz tespit edildi!</strong>
+                </div>
+                <small>
+                    <i class="fas fa-crosshairs me-1"></i>
+                    Enlem: {{ number_format($userLat, 6) }}° | Boylam: {{ number_format($userLon, 6) }}°
+                    <br>
+                    <i class="fas fa-info-circle me-1"></i>
+                    Size en yakın {{ $merkezler->count() }} atık merkezi mesafe sırasına göre listelendi.
+                    <br>
+                    <i class="fa fa-exclamation-circle me-1" aria-hidden="true"></i>
+                    Uyarı: Konumunuz kullandığınız cihaza, tarayıcınıza, konum ayarlarınıza, veya ağ bağlantınıza bağlı olarak farklılık gösterebilir! 
+                    <br>
+                </small>
+            </div>
+            
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h4>
+                    <i class="fas fa-location-arrow text-success me-2"></i>
+                    Size En Yakın Atık Merkezleri
+                </h4>
+            </div>
+            
+            <div class="d-flex align-items-center gap-3 mb-4">
+                <button id="clearFilteredSelection" class="btn btn-outline-danger btn-sm" style="display: none;">
+                    <i class="fas fa-times me-1"></i> Seçilenleri Temizle
+                </button>
+                <div id="selectedCount" class="badge bg-primary" style="display: none;">
+                    <span id="countText">0</span> seçildi
+                </div>
+                <button id="showSelectedOnMap" class="btn btn-success btn-sm" style="display: none;">
+                    <i class="fas fa-map-marked-alt me-1"></i> Seçilenleri Haritada Göster
+                </button>
+            </div>
+            
+            <div class="row row-cols-1 row-cols-md-2 g-4 mb-5">
+                @foreach($merkezler as $merkez)
+                    <div class="col">
+                        <div class="card border-success h-100 selectable-card position-relative" data-merkez-id="{{ $merkez->id }}" style="cursor: pointer; transition: all 0.3s ease;">
+                            <div class="card-body">
+                                <div class="form-check position-absolute" style="top: 10px; right: 10px;">
+                                    <input class="form-check-input merkez-checkbox" type="checkbox" id="merkez-{{ $merkez->id }}" data-merkez-id="{{ $merkez->id }}">
+                                </div>
+                                <h5 class="card-title pe-5">{{ $merkez->title }}</h5>
+                                <div class="mb-2">
+                                    <span class="badge bg-success">
+                                        <i class="fas fa-route me-1"></i>{{ number_format($merkez->distance, 1) }} km mesafede
+                                    </span>
+                                </div>
+                                <p class="card-text">{{ $merkez->content }}</p>
+                                <small class="text-muted">
+                                    <i class="fas fa-map-marker-alt me-1"></i>{{ $merkez->adres }}
+                                </small>
+                            </div>
+                            <div class="map-button-container position-absolute" style="bottom: 10px; right: 10px; display: none;">
+                                <button class="btn btn-success btn-sm haritada-goster-btn" data-merkez-id="{{ $merkez->id }}">
+                                    <i class="fas fa-map-marker-alt me-1"></i> Haritada Göster
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                @endforeach
+            </div>
+        @else
+            <div class="alert alert-warning mb-5">
+                <i class="fas fa-exclamation-triangle me-2"></i>
+                Yakınlarda atık merkezi bulunamadı.
+            </div>
+        @endif
+    </div>
+
 <!-- Arama Sonuçları -->
-@if(isset($merkezler) && request()->has('search'))
-    <div class="container mt-4">
+@elseif(isset($merkezler) && request()->has('search'))
+    <div class="container mt-4 mb-5">
         @if($merkezler->count() > 0)
             <div class="d-flex justify-content-between align-items-center mb-3">
                 <h4>
@@ -92,8 +169,44 @@
                 </h4>
                 <small class="text-muted">Aranan: "<strong>{{ request('search') }}</strong>"</small>
             </div>
+            
+            <div class="d-flex align-items-center gap-3 mb-4">
+                <button id="clearFilteredSelection" class="btn btn-outline-danger btn-sm" style="display: none;">
+                    <i class="fas fa-times me-1"></i> Seçilenleri Temizle
+                </button>
+                <div id="selectedCount" class="badge bg-primary" style="display: none;">
+                    <span id="countText">0</span> seçildi
+                </div>
+                <button id="showSelectedOnMap" class="btn btn-success btn-sm" style="display: none;">
+                    <i class="fas fa-map-marked-alt me-1"></i> Seçilenleri Haritada Göster
+                </button>
+            </div>
+            
+            <div class="row row-cols-1 row-cols-md-2 g-4 mb-5">
+                @foreach($merkezler as $merkez)
+                    <div class="col">
+                        <div class="card border-primary h-100 selectable-card position-relative" data-merkez-id="{{ $merkez->id }}" style="cursor: pointer; transition: all 0.3s ease;">
+                            <div class="card-body">
+                                <div class="form-check position-absolute" style="top: 10px; right: 10px;">
+                                    <input class="form-check-input merkez-checkbox" type="checkbox" id="merkez-{{ $merkez->id }}" data-merkez-id="{{ $merkez->id }}">
+                                </div>
+                                <h5 class="card-title pe-5">{{ $merkez->title }}</h5>
+                                <p class="card-text">{{ $merkez->content }}</p>
+                                <small class="text-muted">
+                                    <i class="fas fa-map-marker-alt me-1"></i>{{ $merkez->adres }}
+                                </small>
+                            </div>
+                            <div class="map-button-container position-absolute" style="bottom: 10px; right: 10px; display: none;">
+                                <button class="btn btn-success btn-sm haritada-goster-btn" data-merkez-id="{{ $merkez->id }}">
+                                    <i class="fas fa-map-marker-alt me-1"></i> Haritada Göster
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                @endforeach
+            </div>
         @else
-            <div class="alert alert-warning">
+            <div class="alert alert-warning mb-5">
                 <i class="fas fa-exclamation-triangle me-2"></i>
                 "<strong>{{ request('search') }}</strong>" için sonuç bulunamadı.
                 <hr>
@@ -104,46 +217,11 @@
                 </div>
             </div>
         @endif
-        @if($merkezler->count() > 0)
-            <div class="d-flex align-items-center gap-3">
-                <button id="clearFilteredSelection" class="btn btn-outline-danger btn-sm" style="display: none;">
-                    <i class="fas fa-times me-1"></i> Seçilenleri Temizle
-                </button>
-                <div id="selectedCount" class="badge bg-primary" style="display: none;">
-                    <span id="countText">0</span> seçildi
-                </div>
-                <button id="showSelectedOnMap" class="btn btn-success btn-sm" style="display: none;">
-                    <i class="fas fa-map-marked-alt me-1"></i> Seçilenleri Haritada Göster
-                </button>
-            </div>
-        </div>
-        <div class="row row-cols-1 row-cols-md-2 g-4">
-            @foreach($merkezler as $merkez)
-                <div class="col">
-                    <div class="card border-primary h-100 selectable-card position-relative" data-merkez-id="{{ $merkez->id }}" style="cursor: pointer; transition: all 0.3s ease;">
-                        <div class="card-body">
-                            <div class="form-check position-absolute" style="top: 10px; right: 10px;">
-                                <input class="form-check-input merkez-checkbox" type="checkbox" id="merkez-{{ $merkez->id }}" data-merkez-id="{{ $merkez->id }}">
-                            </div>
-                            <h5 class="card-title pe-5">{{ $merkez->title }}</h5>
-                            <p class="card-text">{{ $merkez->content }}</p>
-                            <small class="text-muted">Adres: {{ $merkez->adres }}</small>
-                        </div>
-                        <div class="map-button-container position-absolute" style="bottom: 10px; right: 10px; display: none;">
-                            <button class="btn btn-success btn-sm haritada-goster-btn" data-merkez-id="{{ $merkez->id }}">
-                                <i class="fas fa-map-marker-alt me-1"></i> Haritada Göster
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            @endforeach
-        </div>
-        @endif
     </div>
 
 <!-- Filtre Sonuçları -->
 @elseif(isset($merkezler) && $merkezler->count())
-    <div class="container mt-4">
+    <div class="container mt-4 mb-5">
         <div class="d-flex justify-content-between align-items-center mb-3">
             <h4>
                 <i class="fas fa-filter text-success me-2"></i>
@@ -152,19 +230,20 @@
             </h4>
             <small class="text-muted">{{ count(request('filter', [])) }} filtre aktif</small>
         </div>
-            <div class="d-flex align-items-center gap-3">
-                <button id="clearFilteredSelection" class="btn btn-outline-danger btn-sm" style="display: none;">
-                    <i class="fas fa-times me-1"></i> Seçilenleri Temizle
-                </button>
-                <div id="selectedCount" class="badge bg-primary" style="display: none;">
-                    <span id="countText">0</span> seçildi
-                </div>
-                <button id="showSelectedOnMap" class="btn btn-success btn-sm" style="display: none;">
-                    <i class="fas fa-map-marked-alt me-1"></i> Seçilenleri Haritada Göster
-                </button>
+        
+        <div class="d-flex align-items-center gap-3 mb-4">
+            <button id="clearFilteredSelection" class="btn btn-outline-danger btn-sm" style="display: none;">
+                <i class="fas fa-times me-1"></i> Seçilenleri Temizle
+            </button>
+            <div id="selectedCount" class="badge bg-primary" style="display: none;">
+                <span id="countText">0</span> seçildi
             </div>
+            <button id="showSelectedOnMap" class="btn btn-success btn-sm" style="display: none;">
+                <i class="fas fa-map-marked-alt me-1"></i> Seçilenleri Haritada Göster
+            </button>
         </div>
-        <div class="row row-cols-1 row-cols-md-2 g-4">
+        
+        <div class="row row-cols-1 row-cols-md-2 g-4 mb-5">
             @foreach($merkezler as $merkez)
                 <div class="col">
                     <div class="card border-primary h-100 selectable-card position-relative" data-merkez-id="{{ $merkez->id }}" style="cursor: pointer; transition: all 0.3s ease;">
@@ -174,7 +253,9 @@
                             </div>
                             <h5 class="card-title pe-5">{{ $merkez->title }}</h5>
                             <p class="card-text">{{ $merkez->content }}</p>
-                            <small class="text-muted">Adres: {{ $merkez->adres }}</small>
+                            <small class="text-muted">
+                                <i class="fas fa-map-marker-alt me-1"></i>{{ $merkez->adres }}
+                            </small>
                         </div>
                         <div class="map-button-container position-absolute" style="bottom: 10px; right: 10px; display: none;">
                             <button class="btn btn-success btn-sm haritada-goster-btn" data-merkez-id="{{ $merkez->id }}">
@@ -187,15 +268,21 @@
         </div>
     </div>
 @elseif(request()->has('filter'))
-    <div class="container mt-4">
-        <p class="text-danger">Filtrene uyan bir atık merkezi bulunamadı.</p>
+    <div class="container mt-4 mb-5">
+        <div class="alert alert-warning mb-5">
+            <i class="fas fa-exclamation-triangle me-2"></i>
+            Filtreye uyan bir atık merkezi bulunamadı.
+        </div>
     </div>
 @endif
 
 @if(isset($tumMerkezler) && $tumMerkezler->count())
     <div class="container mt-4">
         <div class="d-flex justify-content-between align-items-center mb-3">
-            <h4>Tüm Atık Merkezleri</h4>
+            <h4>
+                <i class="fas fa-building text-primary me-2"></i>
+                Tüm Atık Merkezleri
+            </h4>
             <div class="d-flex align-items-center gap-3">
                 <button id="clearAllSelection" class="btn btn-outline-danger btn-sm" style="display: none;">
                     <i class="fas fa-times me-1"></i> Seçilenleri Temizle
@@ -218,7 +305,9 @@
                             </div>
                             <h5 class="card-title pe-5">{{ $merkez->title }}</h5>
                             <p class="card-text">{{ $merkez->content }}</p>
-                            <small class="text-muted">Adres: {{ $merkez->adres }}</small>
+                            <small class="text-muted">
+                                <i class="fas fa-map-marker-alt me-1"></i>{{ $merkez->adres }}
+                            </small>
                         </div>
                         <div class="map-button-container position-absolute" style="bottom: 10px; right: 10px; display: none;">
                             <button class="btn btn-success btn-sm haritada-goster-btn" data-merkez-id="{{ $merkez->id }}">
@@ -246,7 +335,7 @@
         </div>
         
         <!-- End of data message -->
-        <div id="endOfData" class="text-center mt-4" style="display: none;">
+        <div id="endOfData" class="text-center mt-4 mb-4" style="display: none;">
             <p class="text-muted">Tüm atık merkezleri yüklendi.</p>
         </div>
     </div>

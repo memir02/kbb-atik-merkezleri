@@ -91,10 +91,14 @@ document.addEventListener('DOMContentLoaded', function() {
         
         if (isSelected) {
             card.classList.add('selected');
-            mapButtonContainer.style.display = 'block';
+            if (mapButtonContainer) {
+                mapButtonContainer.style.display = 'block';
+            }
         } else {
             card.classList.remove('selected');
-            mapButtonContainer.style.display = 'none';
+            if (mapButtonContainer) {
+                mapButtonContainer.style.display = 'none';
+            }
         }
     }
 
@@ -104,20 +108,38 @@ document.addEventListener('DOMContentLoaded', function() {
         const clearFilteredBtn = document.getElementById('clearFilteredSelection');
         
         if (count > 0) {
-            countText.textContent = count;
-            selectedCount.style.display = 'block';
-            clearFilteredBtn.style.display = 'block';
+            if (countText) {
+                countText.textContent = count;
+            }
+            
+            if (selectedCount) {
+                selectedCount.style.display = 'block';
+            }
+            
+            if (clearFilteredBtn) {
+                clearFilteredBtn.style.display = 'block';
+            }
             
             // Birden fazla merkez seçilmişse "Seçilenleri Haritada Göster" butonunu göster
-            if (count > 1) {
-                showSelectedOnMapBtn.style.display = 'block';
-            } else {
-                showSelectedOnMapBtn.style.display = 'none';
+            if (showSelectedOnMapBtn) {
+                if (count > 1) {
+                    showSelectedOnMapBtn.style.display = 'block';
+                } else {
+                    showSelectedOnMapBtn.style.display = 'none';
+                }
             }
         } else {
-            selectedCount.style.display = 'none';
-            showSelectedOnMapBtn.style.display = 'none';
-            clearFilteredBtn.style.display = 'none';
+            if (selectedCount) {
+                selectedCount.style.display = 'none';
+            }
+            
+            if (showSelectedOnMapBtn) {
+                showSelectedOnMapBtn.style.display = 'none';
+            }
+            
+            if (clearFilteredBtn) {
+                clearFilteredBtn.style.display = 'none';
+            }
         }
     }
 
@@ -140,20 +162,39 @@ document.addEventListener('DOMContentLoaded', function() {
         const showAllSelectedOnMapBtn = document.getElementById('showAllSelectedOnMap');
         const clearAllBtn = document.getElementById('clearAllSelection');
         
+        // Null element kontrolü ekle
         if (count > 0) {
-            allCountText.textContent = count;
-            allSelectedCount.style.display = 'block';
-            clearAllBtn.style.display = 'block';
+            if (allCountText) {
+                allCountText.textContent = count;
+            }
             
-            if (count > 1) {
-                showAllSelectedOnMapBtn.style.display = 'block';
-            } else {
-                showAllSelectedOnMapBtn.style.display = 'none';
+            if (allSelectedCount) {
+                allSelectedCount.style.display = 'block';
+            }
+            
+            if (clearAllBtn) {
+                clearAllBtn.style.display = 'block';
+            }
+            
+            if (showAllSelectedOnMapBtn) {
+                if (count > 1) {
+                    showAllSelectedOnMapBtn.style.display = 'block';
+                } else {
+                    showAllSelectedOnMapBtn.style.display = 'none';
+                }
             }
         } else {
-            allSelectedCount.style.display = 'none';
-            showAllSelectedOnMapBtn.style.display = 'none';
-            clearAllBtn.style.display = 'none';
+            if (allSelectedCount) {
+                allSelectedCount.style.display = 'none';
+            }
+            
+            if (showAllSelectedOnMapBtn) {
+                showAllSelectedOnMapBtn.style.display = 'none';
+            }
+            
+            if (clearAllBtn) {
+                clearAllBtn.style.display = 'none';
+            }
         }
     }
 
@@ -162,10 +203,14 @@ document.addEventListener('DOMContentLoaded', function() {
         
         if (isSelected) {
             card.classList.add('selected');
-            mapButtonContainer.style.display = 'block';
+            if (mapButtonContainer) {
+                mapButtonContainer.style.display = 'block';
+            }
         } else {
             card.classList.remove('selected');
-            mapButtonContainer.style.display = 'none';
+            if (mapButtonContainer) {
+                mapButtonContainer.style.display = 'none';
+            }
         }
     }
 
@@ -286,6 +331,16 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function showOnMap(merkezId) {
+        // Kullanıcının konumunu kontrol et
+        const userLocationData = document.querySelector('[data-user-location]');
+        let userLat = null;
+        let userLon = null;
+        
+        if (userLocationData) {
+            userLat = parseFloat(userLocationData.getAttribute('data-user-lat'));
+            userLon = parseFloat(userLocationData.getAttribute('data-user-lon'));
+        }
+        
         // Backend'den merkez bilgilerini al
         fetch(`/api/merkez/${merkezId}`)
             .then(response => {
@@ -303,8 +358,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 // Harita modalını aç
                 const mapModalElement = document.getElementById('mapModal');
                 const mapModal = bootstrap.Modal.getOrCreateInstance(mapModalElement);
-                document.getElementById('mapModalLabel').innerHTML = 
-                    `<i class="fas fa-map-marker-alt me-2"></i>${merkez.title}`;
+                
+                let title = `<i class="fas fa-map-marker-alt me-2 style="color:rgb(207, 4, 4)"></i>${merkez.title}`;
+                if (userLat && userLon) {
+                    title += ` <small class="text-muted">+ Konumunuz</small>`;
+                }
+                document.getElementById('mapModalLabel').innerHTML = title;
                 mapModal.show();
                 
                 // Harita başlat
@@ -312,19 +371,65 @@ document.addEventListener('DOMContentLoaded', function() {
                     initializeMap();
                     clearMarkers();
                     
-                    // Marker ekle
-                    const marker = L.marker([merkez.lat, merkez.lon]).addTo(map);
-                    marker.bindPopup(`
+                    const group = new L.featureGroup();
+                    
+                    // Kullanıcının konumunu ekle (varsa)
+                    if (userLat && userLon) {
+                        const userIcon = L.divIcon({
+                            html: '<i class="fas fa-user-circle" style="color:rgb(255, 0, 0); font-size: 40px;"></i>',
+                            iconSize: [60, 60],
+                            className: 'custom-div-icon'
+                        });
+                        
+                        const userMarker = L.marker([userLat, userLon], { icon: userIcon }).addTo(map);
+                        userMarker.bindPopup(`
+                            <div class="text-center">
+                                <b class="text-danger"><i class="fas fa-user-circle me-1" style="color:rgb(255, 0, 0);"></i>Konumunuz</b><br>
+                                <small class="text-muted">Enlem: ${userLat.toFixed(6)}°<br>Boylam: ${userLon.toFixed(6)}°</small>
+                            </div>
+                        `);
+                        
+                        markers.push(userMarker);
+                        group.addLayer(userMarker);
+                    }
+                    
+                    // Atık merkezi marker'ı ekle
+                    const markerIcon = L.divIcon({
+                        html: '<i class="fas fa-leaf" style="color:rgb(46, 160, 12); font-size: 40px;"></i>',
+                        iconSize: [60, 60],
+                        className: 'custom-div-icon'
+                    });
+                    
+                    const marker = L.marker([merkez.lat, merkez.lon], { icon: markerIcon }).addTo(map);
+                    
+                    let popupContent = `
                         <div class="text-center">
                             <b class="text-success">${merkez.title}</b><br>
                             <small class="text-muted">${merkez.content}</small><br>
                             <small><i class="fas fa-map-marker-alt"></i> ${merkez.adres}</small>
-                        </div>
-                    `).openPopup();
+                    `;
                     
-                    // Haritayı merkeze odakla
-                    map.setView([merkez.lat, merkez.lon], 15);
+                    // Eğer mesafe bilgisi varsa ekle
+                    if (merkez.distance) {
+                        popupContent += `<br><span class="badge bg-success mt-1">
+                            <i class="fas fa-route me-1"></i>${parseFloat(merkez.distance).toFixed(1)} km
+                        </span>`;
+                    }
+                    
+                    popupContent += `</div>`;
+                    
+                    marker.bindPopup(popupContent).openPopup();
                     markers.push(marker);
+                    group.addLayer(marker);
+                    
+                    // Haritayı ayarla
+                    if (userLat && userLon) {
+                        // Hem kullanıcı hem merkez varsa ikisini de kapsayacak şekilde zoom yap
+                        map.fitBounds(group.getBounds().pad(0.2));
+                    } else {
+                        // Sadece merkez varsa merkeze odakla
+                        map.setView([merkez.lat, merkez.lon], 15);
+                    }
                 }, 300);
             })
             .catch(error => {
@@ -334,6 +439,16 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function showMultipleOnMap(merkezIds) {
+        // Kullanıcının konumunu kontrol et (konuma göre arama sayfasından geliyorsa)
+        const userLocationData = document.querySelector('[data-user-location]');
+        let userLat = null;
+        let userLon = null;
+        
+        if (userLocationData) {
+            userLat = parseFloat(userLocationData.getAttribute('data-user-lat'));
+            userLon = parseFloat(userLocationData.getAttribute('data-user-lon'));
+        }
+        
         // Backend'den birden fazla merkez bilgisi al
         fetch('/api/merkezler', {
             method: 'POST',
@@ -360,8 +475,12 @@ document.addEventListener('DOMContentLoaded', function() {
             // Harita modalını aç
             const mapModalElement = document.getElementById('mapModal');
             const mapModal = bootstrap.Modal.getOrCreateInstance(mapModalElement);
-            document.getElementById('mapModalLabel').innerHTML = 
-                `<i class="fas fa-map-marked-alt me-2"></i>Seçili Atık Merkezleri (${validMerkezler.length})`;
+            
+            let title = `<i class="fas fa-map-marked-alt me-2 style="color:rgb(255, 0, 0)"></i>Seçili Atık Merkezleri (${validMerkezler.length})`;
+            if (userLat && userLon) {
+                title += ` <small class="text-muted">+ Konumunuz</small>`;
+            }
+            document.getElementById('mapModalLabel').innerHTML = title;
             mapModal.show();
             
             setTimeout(() => {
@@ -371,26 +490,62 @@ document.addEventListener('DOMContentLoaded', function() {
                 // Tüm merkezler için marker ekle
                 const group = new L.featureGroup();
                 
-                validMerkezler.forEach((merkez, index) => {
-                    // Farklı renkli markerlar için
-                    const markerColor = index === 0 ? 'red' : 'blue';
+                // Kullanıcının konumunu ekle (varsa)
+                if (userLat && userLon) {
+                    // Kullanıcı konumu için özel icon
+                    const userIcon = L.divIcon({
+                        html: '<i class="fas fa-user-circle" style="color:rgb(255, 0, 0); font-size: 40px;"></i>',
+                        iconSize: [60, 60],
+                        className: 'custom-div-icon'
+                    });
                     
-                    const marker = L.marker([merkez.lat, merkez.lon]).addTo(map);
-                    marker.bindPopup(`
+                    const userMarker = L.marker([userLat, userLon], { icon: userIcon }).addTo(map);
+                    userMarker.bindPopup(`
+                        <div class="text-center">
+                            <b class="text-danger"><i class="fas fa-user-circle me-1" style="color:rgb(255, 0, 0);"></i>Konumunuz</b><br>
+                            <small class="text-muted">Enlem: ${userLat.toFixed(6)}°<br>Boylam: ${userLon.toFixed(6)}°</small>
+                        </div>
+                    `);
+                    
+                    markers.push(userMarker);
+                    group.addLayer(userMarker);
+                }
+                
+                validMerkezler.forEach((merkez, index) => {
+                    // Atık merkezleri için yeşil marker
+                    const markerIcon = L.divIcon({
+                        html: '<i class="fas fa-leaf" style="color:rgb(46, 160, 12); font-size: 40px;"></i>',
+                        iconSize: [60, 60],
+                        className: 'custom-div-icon'
+                    });
+                    
+                    const marker = L.marker([merkez.lat, merkez.lon], { icon: markerIcon }).addTo(map);
+                    
+                    let popupContent = `
                         <div class="text-center">
                             <b class="text-success">${merkez.title}</b><br>
                             <small class="text-muted">${merkez.content}</small><br>
                             <small><i class="fas fa-map-marker-alt"></i> ${merkez.adres}</small>
-                        </div>
-                    `);
+                    `;
+                    
+                    // Eğer mesafe bilgisi varsa ekle
+                    if (merkez.distance) {
+                        popupContent += `<br><span class="badge bg-success mt-1">
+                            <i class="fas fa-route me-1"></i>${parseFloat(merkez.distance).toFixed(1)} km
+                        </span>`;
+                    }
+                    
+                    popupContent += `</div>`;
+                    
+                    marker.bindPopup(popupContent);
                     
                     markers.push(marker);
                     group.addLayer(marker);
                 });
                 
                 // Tüm markerları kapsayacak şekilde zoom ayarla
-                if (validMerkezler.length === 1) {
-                    map.setView([validMerkezler[0].lat, validMerkezler[0].lon], 15);
+                if (group.getLayers().length === 1) {
+                    map.setView(group.getLayers()[0].getLatLng(), 15);
                 } else {
                     map.fitBounds(group.getBounds().pad(0.1));
                 }
@@ -465,6 +620,121 @@ document.addEventListener('DOMContentLoaded', function() {
     if (loadMoreBtn) {
         loadMoreBtn.addEventListener('click', function() {
             loadMoreMerkezler();
+        });
+    }
+
+    // Konuma göre arama butonu
+    const konumBtn = document.getElementById("konuma-gore-ara");
+    if (konumBtn) {
+        konumBtn.addEventListener("click", function () {
+            // Butonu geçici olarak devre dışı bırak
+            konumBtn.disabled = true;
+            konumBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Konum Alınıyor...';
+            
+            // Önce temel kontrolleri yap
+            console.log('🔍 Konum alma işlemi başlatılıyor...');
+            console.log('📡 HTTPS kontrolü:', window.location.protocol === 'https:' ? '✅' : '❌');
+            console.log('🌐 Geolocation desteği:', navigator.geolocation ? '✅' : '❌');
+            
+            if (!navigator.geolocation) {
+                konumBtn.disabled = false;
+                konumBtn.innerHTML = '<i class="fas fa-location-arrow me-1"></i> KONUMUMA GÖRE BUL';
+                alert("❌ Tarayıcınız konum almayı desteklemiyor.");
+                console.error('❌ Geolocation API desteklenmiyor');
+                return;
+            }
+
+            // Gelişmiş konum alma seçenekleri
+            const options = {
+                enableHighAccuracy: true,    // Yüksek doğruluk
+                timeout: 15000,              // 15 saniye timeout
+                maximumAge: 300000           // 5 dakika cache
+            };
+
+            console.log('📱 Konum izni isteniyor...');
+            
+            navigator.geolocation.getCurrentPosition(
+                function (position) {
+                    const lat = position.coords.latitude;
+                    const lon = position.coords.longitude;
+                    const accuracy = position.coords.accuracy;
+                    const timestamp = new Date(position.timestamp);
+
+                    // Detaylı debug bilgileri
+                    console.log('✅ Konum başarıyla alındı!');
+                    console.log('📍 Koordinatlar:');
+                    console.log(`   Enlem: ${lat.toFixed(8)}°`);
+                    console.log(`   Boylam: ${lon.toFixed(8)}°`);
+                    console.log(`🎯 Doğruluk: ±${Math.round(accuracy)} metre`);
+                    console.log(`⏰ Zaman: ${timestamp.toLocaleString('tr-TR')}`);
+                    console.log(`🗺️ Google Maps Link: https://maps.google.com/?q=${lat},${lon}`);
+                    
+                    // Koordinat geçerliliği kontrolü
+                    if (!lat || !lon || isNaN(lat) || isNaN(lon)) {
+                        console.error('❌ Geçersiz koordinatlar alındı!');
+                        konumBtn.disabled = false;
+                        konumBtn.innerHTML = '<i class="fas fa-location-arrow me-1"></i> KONUMUMA GÖRE BUL';
+                        alert('❌ Geçersiz konum bilgisi alındı. Lütfen tekrar deneyin.');
+                        return;
+                    }
+
+                    // Dünya sınırları kontrolü
+                    if (lat < -90 || lat > 90 || lon < -180 || lon > 180) {
+                        console.error('❌ Koordinatlar dünya sınırları dışında!');
+                        konumBtn.disabled = false;
+                        konumBtn.innerHTML = '<i class="fas fa-location-arrow me-1"></i> KONUMUMA GÖRE BUL';
+                        alert('❌ Alınan koordinatlar geçersiz. Lütfen tekrar deneyin.');
+                        return;
+                    }
+
+                    console.log('🚀 Laravel\'e yönlendiriliyor...');
+                    
+                    // Laravel'e GET ile yönlendir
+                    window.location.href = `/konuma-gore?lat=${lat}&lon=${lon}`;
+                }, 
+                function (error) {
+                    // Butonu tekrar etkinleştir
+                    konumBtn.disabled = false;
+                    konumBtn.innerHTML = '<i class="fas fa-location-arrow me-1"></i> KONUMUMA GÖRE BUL';
+                    
+                    console.error('❌ Konum alma hatası:', error);
+                    
+                    let errorMessage = "❌ Konum alınamadı.\n\n";
+                    let debugInfo = "";
+                    
+                    switch(error.code) {
+                        case error.PERMISSION_DENIED:
+                            errorMessage += "🚫 Konum izni reddedildi.";
+                            debugInfo = "Çözüm: Tarayıcının adres çubuğundaki konum icon'una tıklayın ve 'İzin Ver' seçin.";
+                            console.log('💡 Çözüm önerisi: Tarayıcı ayarlarından konum izni verin');
+                            break;
+                        case error.POSITION_UNAVAILABLE:
+                            errorMessage += "📡 Konum bilgisi mevcut değil.";
+                            debugInfo = "Çözüm: GPS'inizi açın, WiFi/mobil veriye bağlı olun, açık alanda deneyin.";
+                            console.log('💡 Çözüm önerisi: GPS açın, dış mekanda deneyin');
+                            break;
+                        case error.TIMEOUT:
+                            errorMessage += "⏰ Konum alma zaman aşımı (15 saniye).";
+                            debugInfo = "Çözüm: İnternet bağlantınızı kontrol edin, tekrar deneyin.";
+                            console.log('💡 Çözüm önerisi: İnternet bağlantınızı kontrol edin');
+                            break;
+                        default:
+                            errorMessage += "❓ Bilinmeyen hata oluştu.";
+                            debugInfo = "Hata kodu: " + error.code;
+                            console.log('💡 Hata detayı:', error.message || 'Bilinmeyen hata');
+                            break;
+                    }
+                    
+                    alert(errorMessage + "\n\n" + debugInfo);
+                    console.log('📋 Hata detayları:', {
+                        kod: error.code,
+                        mesaj: error.message,
+                        https: window.location.protocol === 'https:',
+                        userAgent: navigator.userAgent
+                    });
+                }, 
+                options
+            );
         });
     }
 

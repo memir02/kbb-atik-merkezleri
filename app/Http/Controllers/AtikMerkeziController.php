@@ -151,4 +151,45 @@ class AtikMerkeziController extends Controller
             'hasMore' => AtikMerkezi::count() > ($offset + $limit)
         ]);
     }
+
+    /**
+     * Konuma göre en yakın atık merkezlerini getir
+     */
+    public function konumaGore(Request $request)
+    {
+        $lat = $request->input('lat');
+        $lon = $request->input('lon');
+
+        if (!$lat || !$lon) {
+            return redirect('/')->with('error', 'Konum bilgisi alınamadı.');
+        }
+
+        // En yakın 10 atık merkezini bul (Haversine formülü ile)
+        $merkezler = AtikMerkezi::whereNotNull('lat')
+            ->whereNotNull('lon')
+            ->selectRaw("
+                *,
+                ROUND(
+                    (6371 * acos(
+                        cos(radians(?)) * 
+                        cos(radians(lat)) * 
+                        cos(radians(lon) - radians(?)) + 
+                        sin(radians(?)) * 
+                        sin(radians(lat))
+                    )), 2
+                ) AS distance
+            ", [$lat, $lon, $lat])
+            ->orderBy('distance')
+            ->take(10)
+            ->get();
+
+        return view('index', [
+            'merkezler' => $merkezler,
+            'tumMerkezler' => null,
+            'searchTerm' => 'Konumunuza en yakın atık merkezleri',
+            'isLocationSearch' => true,
+            'userLat' => $lat,
+            'userLon' => $lon
+        ]);
+    }
 }
