@@ -109,6 +109,9 @@
             </div>
             
             <div class="d-flex align-items-center gap-3 mb-4">
+                <button id="selectAllFiltered" class="btn btn-outline-primary btn-sm">
+                    <i class="fas fa-check-square me-1"></i> <span class="select-text">Tümünü Seç</span>
+                </button>
                 <button id="clearFilteredSelection" class="btn btn-outline-danger btn-sm" style="display: none;">
                     <i class="fas fa-times me-1"></i> Seçilenleri Temizle
                 </button>
@@ -170,6 +173,9 @@
             </div>
             
             <div class="d-flex align-items-center gap-3 mb-4">
+                <button id="selectAllFiltered" class="btn btn-outline-primary btn-sm">
+                    <i class="fas fa-check-square me-1"></i> <span class="select-text">Tümünü Seç</span>
+                </button>
                 <button id="clearFilteredSelection" class="btn btn-outline-danger btn-sm" style="display: none;">
                     <i class="fas fa-times me-1"></i> Seçilenleri Temizle
                 </button>
@@ -231,6 +237,9 @@
         </div>
         
         <div class="d-flex align-items-center gap-3 mb-4">
+            <button id="selectAllFiltered" class="btn btn-outline-primary btn-sm">
+                <i class="fas fa-check-square me-1"></i> <span class="select-text">Tümünü Seç</span>
+            </button>
             <button id="clearFilteredSelection" class="btn btn-outline-danger btn-sm" style="display: none;">
                 <i class="fas fa-times me-1"></i> Seçilenleri Temizle
             </button>
@@ -283,6 +292,9 @@
                 Tüm Atık Merkezleri
             </h4>
             <div class="d-flex align-items-center gap-3">
+                <button id="selectAllMerkezler" class="btn btn-outline-primary btn-sm">
+                    <i class="fas fa-check-square me-1"></i> <span class="select-all-text">Tümünü Seç</span>
+                </button>
                 <button id="clearAllSelection" class="btn btn-outline-danger btn-sm" style="display: none;">
                     <i class="fas fa-times me-1"></i> Seçilenleri Temizle
                 </button>

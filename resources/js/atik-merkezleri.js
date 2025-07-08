@@ -66,14 +66,40 @@ document.addEventListener('DOMContentLoaded', function() {
     function updateSelectedCount(selectorType = 'filtered') {
         const isAll = selectorType === 'all';
         const checkboxSelector = isAll ? '.all-merkez-checkbox:checked' : '.merkez-checkbox:checked';
+        const allCheckboxSelector = isAll ? '.all-merkez-checkbox' : '.merkez-checkbox';
         const selectedCheckboxes = document.querySelectorAll(checkboxSelector);
+        const allCheckboxes = document.querySelectorAll(allCheckboxSelector);
         const count = selectedCheckboxes.length;
+        const totalCount = allCheckboxes.length;
         
         // Element referansları
         const selectedCount = document.getElementById(isAll ? 'allSelectedCount' : 'selectedCount');
         const countText = document.getElementById(isAll ? 'allCountText' : 'countText');
         const showSelectedBtn = document.getElementById(isAll ? 'showAllSelectedOnMap' : 'showSelectedOnMap');
         const clearBtn = document.getElementById(isAll ? 'clearAllSelection' : 'clearFilteredSelection');
+        const selectAllBtn = document.getElementById(isAll ? 'selectAllMerkezler' : 'selectAllFiltered');
+        
+        // "Tümünü Seç" butonunun text'ini güncelle
+        if (selectAllBtn) {
+            const textElement = selectAllBtn.querySelector(isAll ? '.select-all-text' : '.select-text');
+            const iconElement = selectAllBtn.querySelector('i');
+            
+            if (count === totalCount && totalCount > 0) {
+                // Hepsi seçili
+                if (textElement) textElement.textContent = 'Seçimi Kaldır';
+                if (iconElement) {
+                    iconElement.className = 'fas fa-minus-square me-1';
+                }
+                selectAllBtn.className = 'btn btn-outline-warning btn-sm';
+            } else {
+                // Hiçbiri veya kısmen seçili
+                if (textElement) textElement.textContent = 'Tümünü Seç';
+                if (iconElement) {
+                    iconElement.className = 'fas fa-check-square me-1';
+                }
+                selectAllBtn.className = 'btn btn-outline-primary btn-sm';
+            }
+        }
         
         if (count > 0) {
             if (countText) countText.textContent = count;
@@ -107,6 +133,27 @@ document.addEventListener('DOMContentLoaded', function() {
             const card = checkbox.closest('.selectable-card');
             updateCardSelection(card, false, selectorType);
         });
+        updateSelectedCount(selectorType);
+    }
+
+    // Tümünü seç/seçimi kaldır toggle fonksiyonu
+    function toggleSelectAll(selectorType = 'filtered') {
+        const isAll = selectorType === 'all';
+        const checkboxSelector = isAll ? '.all-merkez-checkbox' : '.merkez-checkbox';
+        const checkedSelector = isAll ? '.all-merkez-checkbox:checked' : '.merkez-checkbox:checked';
+        
+        const allCheckboxes = document.querySelectorAll(checkboxSelector);
+        const checkedCheckboxes = document.querySelectorAll(checkedSelector);
+        
+        // Eğer hepsi seçilmişse, hepsini kaldır; değilse hepsini seç
+        const shouldSelectAll = checkedCheckboxes.length < allCheckboxes.length;
+        
+        allCheckboxes.forEach(checkbox => {
+            checkbox.checked = shouldSelectAll;
+            const card = checkbox.closest('.selectable-card');
+            updateCardSelection(card, shouldSelectAll, selectorType);
+        });
+        
         updateSelectedCount(selectorType);
     }
 
@@ -162,6 +209,10 @@ document.addEventListener('DOMContentLoaded', function() {
     attachEventListeners(document, 'filtered'); // Filtrelenmiş sonuçlar için
     attachEventListeners(document.getElementById('allMerkezlerContainer') || document, 'all'); // Tüm merkezler için
 
+    // Sayfa yüklendiğinde buton durumlarını güncelle
+    updateSelectedCount('filtered');
+    updateSelectedCount('all');
+
     // Seçilenleri haritada göster butonları
     document.getElementById('showSelectedOnMap')?.addEventListener('click', function() {
         const selectedMerkezIds = getSelectedMerkezIds('filtered');
@@ -184,6 +235,15 @@ document.addEventListener('DOMContentLoaded', function() {
 
     document.getElementById('clearAllSelection')?.addEventListener('click', function() {
         clearSelection('all');
+    });
+
+    // Tümünü seç butonları
+    document.getElementById('selectAllFiltered')?.addEventListener('click', function() {
+        toggleSelectAll('filtered');
+    });
+
+    document.getElementById('selectAllMerkezler')?.addEventListener('click', function() {
+        toggleSelectAll('all');
     });
 
     // Yeni yüklenen kartlar için event listener'ları ekle (public fonksiyon)
