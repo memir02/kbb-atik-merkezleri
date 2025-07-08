@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Konya Büyükşehir Belediyesi Atık Merkezleri</title>
-    <link rel="stylesheet" href="{{ asset('css/atik-merkezleri.css') }}">
     <link rel="icon" href="{{ asset('favicon.png') }}" type="image/png">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@400&display=swap" rel="stylesheet">
@@ -131,20 +130,20 @@
                                 </div>
                                 <h5 class="card-title pe-5">{{ $merkez->title }}</h5>
                                 <div class="mb-2">
-                                    <span class="badge bg-success">
-                                        <i class="fas fa-route me-1"></i>{{ number_format($merkez->distance, 1) }} km mesafede
-                                    </span>
-                                </div>
-                                <p class="card-text">{{ $merkez->content }}</p>
-                                <small class="text-muted">
-                                    <i class="fas fa-map-marker-alt me-1"></i>{{ $merkez->adres }}
-                                </small>
+                                                                    <span class="badge bg-success">
+                                    <i class="fas fa-route me-1"></i>{{ number_format($merkez->distance, 1) }} km mesafede
+                                </span>
                             </div>
-                            <div class="map-button-container position-absolute" style="bottom: 10px; right: 10px; display: none;">
-                                <button class="btn btn-success btn-sm haritada-goster-btn" data-merkez-id="{{ $merkez->id }}">
-                                    <i class="fas fa-map-marker-alt me-1"></i> Haritada Göster
-                                </button>
-                            </div>
+                            <p class="card-text">{{ $merkez->content }}</p>
+                            <small class="text-muted">
+                                <i class="fas fa-map-marker-alt me-1"></i>{{ $merkez->adres }}
+                            </small>
+                        </div>
+                        <div class="map-button-container position-absolute" style="bottom: 10px; right: 10px; display: none;">
+                            <button class="btn btn-success btn-sm haritada-goster-btn" data-merkez-id="{{ $merkez->id }}">
+                                <i class="fas fa-info-circle me-1"></i> Detay Görüntüle-Haritada Göster
+                            </button>
+                        </div>
                         </div>
                     </div>
                 @endforeach
@@ -198,7 +197,7 @@
                             </div>
                             <div class="map-button-container position-absolute" style="bottom: 10px; right: 10px; display: none;">
                                 <button class="btn btn-success btn-sm haritada-goster-btn" data-merkez-id="{{ $merkez->id }}">
-                                    <i class="fas fa-map-marker-alt me-1"></i> Haritada Göster
+                                    <i class="fas fa-info-circle me-1"></i> Detay Görüntüle-Haritada Göster
                                 </button>
                             </div>
                         </div>
@@ -259,7 +258,7 @@
                         </div>
                         <div class="map-button-container position-absolute" style="bottom: 10px; right: 10px; display: none;">
                             <button class="btn btn-success btn-sm haritada-goster-btn" data-merkez-id="{{ $merkez->id }}">
-                                <i class="fas fa-map-marker-alt me-1"></i> Haritada Göster
+                                <i class="fas fa-info-circle me-1"></i> Detay Görüntüle-Haritada Göster
                             </button>
                         </div>
                     </div>
@@ -291,7 +290,7 @@
                     <span id="allCountText">0</span> seçildi
                 </div>
                 <button id="showAllSelectedOnMap" class="btn btn-success btn-sm" style="display: none;">
-                    <i class="fas fa-map-marked-alt me-1"></i> Seçilenleri Haritada Göster
+                    <i class="fas fa-map-marked-alt me-1"></i> Seçilenleri Haritada Göster-Detaylarını Görüntüle
                 </button>
             </div>
         </div>
@@ -311,7 +310,7 @@
                         </div>
                         <div class="map-button-container position-absolute" style="bottom: 10px; right: 10px; display: none;">
                             <button class="btn btn-success btn-sm haritada-goster-btn" data-merkez-id="{{ $merkez->id }}">
-                                <i class="fas fa-map-marker-alt me-1"></i> Haritada Göster
+                                <i class="fas fa-info-circle me-1"></i> Detay Görüntüle-Haritada Göster
                             </button>
                         </div>
                     </div>
@@ -437,18 +436,50 @@
   </div>
 </div>
 
-<!-- Harita Modalı -->
+<!-- Detay ve Harita Modalı -->
 <div class="modal fade" id="mapModal" tabindex="-1" aria-labelledby="mapModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-xl modal-dialog-centered">
     <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title fw-bold" id="mapModalLabel">
-          <i class="fas fa-map-marker-alt me-2"></i>Atık Merkezleri Haritası
-        </h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Kapat"></button>
+      <div class="modal-header pb-1" style="min-height: 80px;">
+        <div class="w-100">
+          <h5 class="modal-title fw-bold mb-3" id="mapModalLabel">
+            <i class="fas fa-map-marker-alt me-2"></i>Atık Merkezi Bilgileri
+          </h5>
+          <!-- Tab Navigation -->
+          <ul class="nav nav-tabs" id="modalTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+              <button class="nav-link active fw-bold" id="detay-tab" data-bs-toggle="tab" data-bs-target="#detay-content" type="button" role="tab" aria-controls="detay-content" aria-selected="true">
+                <i class="fas fa-info-circle me-2"></i>DETAY
+              </button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button class="nav-link fw-bold" id="harita-tab" data-bs-toggle="tab" data-bs-target="#harita-content" type="button" role="tab" aria-controls="harita-content" aria-selected="false">
+                <i class="fas fa-map me-2"></i>HARİTA
+              </button>
+            </li>
+          </ul>
+        </div>
+        <button type="button" class="btn-close ms-3" data-bs-dismiss="modal" aria-label="Kapat"></button>
       </div>
       <div class="modal-body p-0">
-        <div id="map" style="height: 500px; width: 100%; border-radius: 0 0 0.375rem 0.375rem;"></div>
+        <!-- Tab Content -->
+        <div class="tab-content" id="modalTabContent">
+          <!-- DETAY Tab -->
+          <div class="tab-pane fade show active" id="detay-content" role="tabpanel" aria-labelledby="detay-tab">
+            <div class="p-4" id="detay-container">
+              <div class="text-center py-5">
+                <div class="spinner-border text-primary" role="status">
+                  <span class="visually-hidden">Yükleniyor...</span>
+                </div>
+                <p class="mt-3 text-muted">Merkez bilgileri yükleniyor...</p>
+              </div>
+            </div>
+          </div>
+          <!-- HARİTA Tab -->
+          <div class="tab-pane fade" id="harita-content" role="tabpanel" aria-labelledby="harita-tab">
+            <div id="map" style="height: 500px; width: 100%;"></div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
