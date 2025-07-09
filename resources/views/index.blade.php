@@ -5,6 +5,11 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Konya Büyükşehir Belediyesi Atık Merkezleri</title>
     <link rel="icon" href="{{ asset('favicon.png') }}" type="image/png">
+    
+    <!-- Preload critical resources -->
+    <link rel="preload" href="{{ asset('js/atik-merkezleri.js') }}" as="script">
+    <link rel="preload" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" as="style">
+    
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@400&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
@@ -67,6 +72,12 @@
                     </button>
                     <button type="button" id="konuma-gore-ara" class="btn btn-success btn-lg">
                         <i class="fas fa-location-arrow me-1"></i> KONUMUMA GÖRE BUL
+                    </button>
+                    <button type="button" 
+                            class="btn btn-danger btn-lg"
+                            data-bs-toggle="modal" 
+                            data-bs-target="#youtubeModal">
+                            <i class="fab fa-youtube"></i>
                     </button>
                     @if(request('filter'))
                         <a href="{{ route('atik-merkezleri.index') }}" class="btn btn-outline-danger btn-lg">
@@ -497,6 +508,29 @@
   </div>
 </div>
 
+<!-- YouTube Video Modalı -->
+<div class="modal fade" id="youtubeModal" tabindex="-1" aria-labelledby="youtubeModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title fw-bold" id="youtubeModalLabel">
+                    <i class="fab fa-youtube text-danger me-2"></i>
+                    Atık Merkezleri Yönetim Tesisleri 3D Videosu
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Kapat"></button>
+            </div>
+            <div class="modal-body">
+                <div class="ratio ratio-16x9">
+                    <iframe src="https://www.youtube.com/embed/VBFfARZh9QI?start=2" 
+                            title="Atık Merkezleri Yönetim Tesisleri 3D Videosu" 
+                            allowfullscreen>
+                    </iframe>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <footer class="py-3 mt-auto" style="background-color: #34373b; color: white;">
     <div class="container">
         <div class="d-flex justify-content-center align-items-center gap-3 mb-2">
@@ -513,8 +547,8 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <!-- Leaflet JS -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <!-- Atık Merkezleri Custom JS -->
-    <script src="{{ asset('js/atik-merkezleri.js') }}"></script>
+    <!-- Atık Merkezleri Custom JS (ES6 Modules) -->
+    <script type="module" src="{{ asset('js/atik-merkezleri.js') }}"></script>
 
 
 
