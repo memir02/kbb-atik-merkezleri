@@ -24,9 +24,15 @@ class SearchService
      * Filtre değerlerini gerçek content değerleriyle eşleştir
      */
     private const FILTER_MAPPINGS = [
+        'plastik' => 'MOBİL ATIK GETİRME MERKEZİ',
+        'metal' => 'MOBİL ATIK GETİRME MERKEZİ',
+        'cam' => 'MOBİL ATIK GETİRME MERKEZİ',
+        'karton' => 'MOBİL ATIK GETİRME MERKEZİ',
+        'kağıt' => 'MOBİL ATIK GETİRME MERKEZİ',
+        'pil' => 'MOBİL ATIK GETİRME MERKEZİ',
         'mobil' => 'MOBİL ATIK GETİRME MERKEZİ',
         'bitkisel' => 'BİTKİSEL ATIK YAĞ',
-        'cam' => 'ATIK CAM',
+        'atıkcam' => 'ATIK CAM',
         'tekstil' => 'TEKSTİL KUMBARASI',
         'gecici' => 'ATIK GEÇİCİ DEPOLAMA ÜNİTESİ',
         'ilac' => 'ATIK İLAÇ',

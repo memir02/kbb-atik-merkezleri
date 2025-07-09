@@ -377,9 +377,41 @@
             <div class="row row-cols-1 row-cols-md-2 g-2">
               <div class="col">
                 <div class="form-check">
-                  <input class="form-check-input" type="checkbox" name="filter[]" value="mobil" id="filter-mobil">
-                  <label class="form-check-label" for="filter-mobil">
-                    MOBİL ATIK GETİRME MERKEZİ (KAĞIT, PLASTİK, CAM, METAL, PİL)
+                  <input class="form-check-input" type="checkbox" name="filter[]" value="mobil" id="filter-cam">
+                  <label class="form-check-label" for="filter-cam">
+                    CAM
+                  </label>
+                </div>
+              </div>
+              <div class="col">
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" name="filter[]" value="mobil" id="filter-kağıt">
+                  <label class="form-check-label" for="filter-kağıt">
+                    KAĞIT
+                  </label>
+                </div>
+              </div>
+              <div class="col">
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" name="filter[]" value="mobil" id="filter-plastik">
+                  <label class="form-check-label" for="filter-plastik">
+                    PLASTİK
+                  </label>
+                </div>
+              </div>
+              <div class="col">
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" name="filter[]" value="mobil" id="filter-metal">
+                  <label class="form-check-label" for="filter-metal">
+                    METAL
+                  </label>
+                </div>
+              </div>
+              <div class="col">
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" name="filter[]" value="mobil" id="filter-pil">
+                  <label class="form-check-label" for="filter-pil">
+                    PİL
                   </label>
                 </div>
               </div>
@@ -393,8 +425,8 @@
               </div>
               <div class="col">
                 <div class="form-check">
-                  <input class="form-check-input" type="checkbox" name="filter[]" value="cam" id="filter-cam">
-                  <label class="form-check-label" for="filter-cam">
+                  <input class="form-check-input" type="checkbox" name="filter[]" value="atıkcam" id="filter-atıkcam">
+                  <label class="form-check-label" for="filter-atıkcam">
                     ATIK CAM
                   </label>
                 </div>
