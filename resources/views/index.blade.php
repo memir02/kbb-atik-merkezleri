@@ -130,14 +130,14 @@
                     <span id="countText">0</span> seçildi
                 </div>
                 <button id="showSelectedOnMap" class="btn btn-success btn-sm" style="display: none;">
-                    <i class="fas fa-map-marked-alt me-1"></i> Seçilenleri Haritada Göster
+                    <i class="fas fa-map-marked-alt me-1"></i> Seçilenleri Haritada Göster-Detaylarını Görüntüle
                 </button>
             </div>
             
             <div class="row row-cols-1 row-cols-md-2 g-4 mb-5">
                 @foreach($merkezler as $merkez)
                     <div class="col">
-                        <div class="card border-success h-100 selectable-card position-relative" data-merkez-id="{{ $merkez->id }}" style="cursor: pointer; transition: all 0.3s ease;">
+                        <div class="card {{ $merkez->border_class }} h-100 selectable-card position-relative" data-merkez-id="{{ $merkez->id }}" style="cursor: pointer; transition: all 0.3s ease;">
                             <div class="card-body">
                                 <div class="form-check position-absolute" style="top: 10px; right: 10px;">
                                     <input class="form-check-input merkez-checkbox" type="checkbox" id="merkez-{{ $merkez->id }}" data-merkez-id="{{ $merkez->id }}">
@@ -194,14 +194,14 @@
                     <span id="countText">0</span> seçildi
                 </div>
                 <button id="showSelectedOnMap" class="btn btn-success btn-sm" style="display: none;">
-                    <i class="fas fa-map-marked-alt me-1"></i> Seçilenleri Haritada Göster
+                    <i class="fas fa-map-marked-alt me-1"></i> Seçilenleri Haritada Göster-Detaylarını Görüntüle
                 </button>
             </div>
             
             <div class="row row-cols-1 row-cols-md-2 g-4 mb-5">
                 @foreach($merkezler as $merkez)
                     <div class="col">
-                        <div class="card border-primary h-100 selectable-card position-relative" data-merkez-id="{{ $merkez->id }}" style="cursor: pointer; transition: all 0.3s ease;">
+                        <div class="card {{ $merkez->border_class }} h-100 selectable-card position-relative" data-merkez-id="{{ $merkez->id }}" style="cursor: pointer; transition: all 0.3s ease;">
                             <div class="card-body">
                                 <div class="form-check position-absolute" style="top: 10px; right: 10px;">
                                     <input class="form-check-input merkez-checkbox" type="checkbox" id="merkez-{{ $merkez->id }}" data-merkez-id="{{ $merkez->id }}">
@@ -258,14 +258,14 @@
                 <span id="countText">0</span> seçildi
             </div>
             <button id="showSelectedOnMap" class="btn btn-success btn-sm" style="display: none;">
-                <i class="fas fa-map-marked-alt me-1"></i> Seçilenleri Haritada Göster
+                <i class="fas fa-map-marked-alt me-1"></i> Seçilenleri Haritada Göster-Detaylarını Görüntüle
             </button>
         </div>
         
         <div class="row row-cols-1 row-cols-md-2 g-4 mb-5">
             @foreach($merkezler as $merkez)
                 <div class="col">
-                    <div class="card border-primary h-100 selectable-card position-relative" data-merkez-id="{{ $merkez->id }}" style="cursor: pointer; transition: all 0.3s ease;">
+                    <div class="card {{ $merkez->border_class }} h-100 selectable-card position-relative" data-merkez-id="{{ $merkez->id }}" style="cursor: pointer; transition: all 0.3s ease;">
                         <div class="card-body">
                             <div class="form-check position-absolute" style="top: 10px; right: 10px;">
                                 <input class="form-check-input merkez-checkbox" type="checkbox" id="merkez-{{ $merkez->id }}" data-merkez-id="{{ $merkez->id }}">
@@ -320,7 +320,7 @@
         <div id="allMerkezlerContainer" class="row row-cols-1 row-cols-md-2 g-4">
             @foreach($tumMerkezler as $merkez)
                 <div class="col">
-                    <div class="card border-primary h-100 selectable-card position-relative" data-merkez-id="{{ $merkez->id }}" style="cursor: pointer; transition: all 0.3s ease;">
+                    <div class="card {{ $merkez->border_class }} h-100 selectable-card position-relative" data-merkez-id="{{ $merkez->id }}" style="cursor: pointer; transition: all 0.3s ease;">
                         <div class="card-body">
                             <div class="form-check position-absolute" style="top: 10px; right: 10px;">
                                 <input class="form-check-input all-merkez-checkbox" type="checkbox" id="all-merkez-{{ $merkez->id }}" data-merkez-id="{{ $merkez->id }}">
@@ -562,6 +562,7 @@
         </div>
     </div>
 </div>
+
 
 <footer class="py-3 mt-auto" style="background-color: #34373b; color: white;">
     <div class="container">

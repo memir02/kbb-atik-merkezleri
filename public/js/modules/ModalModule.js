@@ -1,3 +1,5 @@
+import { getHeaderClass } from '../utils/borderUtils.js';
+
 /**
  * Modal Module
  * Bootstrap modal işlemlerini yönetir
@@ -133,11 +135,13 @@ export class ModalModule {
         const detayContainer = document.getElementById('detay-container');
         if (!detayContainer) return;
         
+        const borderClass = merkez.border_class || 'border-secondary';
+        const headerClass = getHeaderClass(borderClass);
         let detayHtml = `
             <div class="row">
                 <div class="col-12">
-                    <div class="card border-success">
-                        <div class="card-header bg-success text-white">
+                    <div class="card ${borderClass}">
+                        <div class="card-header ${headerClass}">
                             <h5 class="mb-0">
                                 <i class="fas fa-leaf me-2"></i>${merkez.title}
                             </h5>
@@ -243,10 +247,12 @@ export class ModalModule {
         `;
         
         merkezler.forEach((merkez, index) => {
+            const borderClass = merkez.border_class || 'border-secondary';
+            const headerClass = getHeaderClass(borderClass);
             detayHtml += `
                 <div class="col">
-                    <div class="card h-100 ${merkez.lat && merkez.lon ? 'border-success' : 'border-warning'}">
-                        <div class="card-header ${merkez.lat && merkez.lon ? 'bg-success text-white' : 'bg-warning text-dark'}">
+                    <div class="card h-100 ${borderClass}">
+                        <div class="card-header ${headerClass}">
                             <h6 class="mb-0">
                                 <i class="fas fa-leaf me-2"></i>${merkez.title}
                             </h6>

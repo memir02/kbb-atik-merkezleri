@@ -5,6 +5,10 @@ namespace App\Services;
 use App\Models\AtikMerkezi;
 use Illuminate\Support\Collection;
 
+/**
+ * Location Service
+ * Konum işlemlerini yönetir
+ */
 class LocationService
 {
     /**

@@ -8,6 +8,10 @@ use App\Services\AtikMerkeziService;
 use App\Services\SearchService;
 use App\Services\LocationService;
 
+/**
+ * AtikMerkeziController
+ * Atık merkezi API kontrolcüsü
+ */
 class AtikMerkeziController extends Controller
 {
     protected $atikMerkeziService;

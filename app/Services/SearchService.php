@@ -4,6 +4,10 @@ namespace App\Services;
 
 use App\Models\AtikMerkezi;
 use Illuminate\Support\Collection;
+/**
+ * Search Service
+ * Arama işlemlerini yönetir
+ */
 
 class SearchService
 {
@@ -24,13 +28,11 @@ class SearchService
      * Filtre değerlerini gerçek content değerleriyle eşleştir
      */
     private const FILTER_MAPPINGS = [
-        'plastik' => 'MOBİL ATIK GETİRME MERKEZİ',
-        'metal' => 'MOBİL ATIK GETİRME MERKEZİ',
-        'cam' => 'MOBİL ATIK GETİRME MERKEZİ',
-        'karton' => 'MOBİL ATIK GETİRME MERKEZİ',
-        'kağıt' => 'MOBİL ATIK GETİRME MERKEZİ',
+        'plastik' => 'MOBİL ATIK GETİRME MERKEZİ', 'ATIK GEÇİCİ DEPOLAMA ÜNİTESİ',
+        'metal' => 'MOBİL ATIK GETİRME MERKEZİ', 'ATIK GEÇİCİ DEPOLAMA ÜNİTESİ',
+        'cam' => 'MOBİL ATIK GETİRME MERKEZİ', 'ATIK GEÇİCİ DEPOLAMA ÜNİTESİ',
+        'kağıt' => 'MOBİL ATIK GETİRME MERKEZİ', 'ATIK GEÇİCİ DEPOLAMA ÜNİTESİ',
         'pil' => 'MOBİL ATIK GETİRME MERKEZİ',
-        'mobil' => 'MOBİL ATIK GETİRME MERKEZİ',
         'bitkisel' => 'BİTKİSEL ATIK YAĞ',
         'atıkcam' => 'ATIK CAM',
         'tekstil' => 'TEKSTİL KUMBARASI',

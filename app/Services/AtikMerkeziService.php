@@ -5,6 +5,10 @@ namespace App\Services;
 use App\Models\AtikMerkezi;
 use Illuminate\Http\Request;
 
+/**
+ * AtikMerkeziService
+ * Atık merkezi işlemlerini yönetir
+ */
 class AtikMerkeziService
 {
     /**

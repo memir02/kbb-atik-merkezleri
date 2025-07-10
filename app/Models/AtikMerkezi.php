@@ -4,6 +4,10 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * AtikMerkezi
+ * Atık merkezi modeli
+ */
 class AtikMerkezi extends Model
 {
     // Tablo adı 
@@ -17,6 +21,9 @@ class AtikMerkezi extends Model
         'lon',
     ];
 
+    // JSON serialization'da getter attribute'ları dahil et
+    protected $appends = ['border_class'];
+
     /**
      * content alanı set edilirken HTML etiketlerini kaldır.
      *
@@ -29,5 +36,31 @@ class AtikMerkezi extends Model
     $decoded = html_entity_decode($clean);    // HTML entity’leri gerçek karaktere dönüştür
     $this->attributes['content'] = $decoded;
 }
+public function getBorderClassAttribute()
+{
+    $content = mb_strtoupper($this->content, 'UTF-8'); // Türkçe karakterler için mb_strtoupper
+    $borderClass = 'border-secondary'; // varsayılan gri çerçeve
 
+    if (str_contains($content, '1. SINIF ATIK GETİRME MERKEZİ')) {
+        $borderClass = 'border-success';
+    } elseif (str_contains($content, 'MOBİL ATIK GETİRME MERKEZİ')) {
+        $borderClass = 'border-primary';
+    } elseif (str_contains($content, 'BİTKİSEL ATIK YAĞ')) {
+        $borderClass = 'border-warning';
+    } elseif (str_contains($content, 'ATIK CAM')) {
+        $borderClass = 'border-info';
+    } elseif (str_contains($content, 'TEKSTİL KUMBARASI')) {
+        $borderClass = 'border-success';
+    } elseif (str_contains($content, 'ATIK GEÇİCİ DEPOLAMA ÜNİTESİ')) {
+        $borderClass = 'border-secondary';
+    } elseif (str_contains($content, 'ATIK İLAÇ')) {
+        $borderClass = 'border-danger';
+    } elseif (str_contains($content, 'İNERT ATIK')) {
+        $borderClass = 'border-secondary';
+    } elseif (str_contains($content, 'HAFRİYAT')) {
+        $borderClass = 'border-dark';
+    }
+
+    return $borderClass;
+}
 }

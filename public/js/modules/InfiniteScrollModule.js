@@ -71,8 +71,9 @@ export class InfiniteScrollModule {
      * Merkez card HTML'i oluştur
      */
     createMerkezCardHTML(merkez) {
+        const borderClass = merkez.border_class || 'border-secondary';
         return `
-            <div class="card border-primary h-100 selectable-card position-relative" data-merkez-id="${merkez.id}" style="cursor: pointer; transition: all 0.3s ease;">
+            <div class="card ${borderClass} h-100 selectable-card position-relative" data-merkez-id="${merkez.id}" style="cursor: pointer; transition: all 0.3s ease;">
                 <div class="card-body">
                     <div class="form-check position-absolute" style="top: 10px; right: 10px;">
                         <input class="form-check-input all-merkez-checkbox" type="checkbox" id="all-merkez-${merkez.id}" data-merkez-id="${merkez.id}">
