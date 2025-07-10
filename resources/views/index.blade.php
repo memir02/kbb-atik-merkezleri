@@ -45,7 +45,7 @@
                         <input type="text" 
                                class="form-control" 
                                name="search" 
-                               placeholder="Atık merkezi ismine göre ya da adresine göre ara..."
+                               placeholder="Atık Merkezi Bul"
                                value="{{ request('search') }}">
                         <button class="btn btn-outline-primary" type="submit">
                             <i class="fas fa-search me-1"></i> Ara

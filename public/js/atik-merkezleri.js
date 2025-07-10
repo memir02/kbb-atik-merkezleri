@@ -15,6 +15,7 @@ import { SelectionModule } from './modules/SelectionModule.js';
 import { ModalModule } from './modules/ModalModule.js';
 import { GeolocationModule } from './modules/GeolocationModule.js';
 import { InfiniteScrollModule } from './modules/InfiniteScrollModule.js';
+import { AutocompleteModule } from './modules/AutocompleteModule.js';
 
 /**
  * Ana uygulama sınıfı
@@ -65,6 +66,7 @@ class AtikMerkezleriApp {
         this.modules.modal = new ModalModule(this.modules.api);
         this.modules.geolocation = new GeolocationModule();
         this.modules.infiniteScroll = new InfiniteScrollModule(this.modules.api, this.modules.selection);
+        this.modules.autocomplete = new AutocompleteModule(this.modules.api);
     }
 
     /**
@@ -188,6 +190,7 @@ class AtikMerkezleriApp {
         window.modalModule = this.modules.modal;
         window.geolocationModule = this.modules.geolocation;
         window.infiniteScrollModule = this.modules.infiniteScroll;
+        window.autocompleteModule = this.modules.autocomplete;
         
         // Ana app referansı
         window.atikMerkezleriApp = this;

@@ -116,6 +116,44 @@ class AtikMerkeziController extends Controller
     }
 
     /**
+     * Arama önerileri API
+     */
+    public function suggestions(Request $request)
+    {
+        $query = $request->input('q', '');
+        $limit = min($request->input('limit', 5), 10);
+
+        if (mb_strlen($query, 'UTF-8') < 2) {
+            return response()->json([
+                'success' => true,
+                'data' => [],
+                'message' => 'En az 2 karakter giriniz'
+            ]);
+        }
+
+        $suggestions = $this->searchService->getSearchSuggestions($query, $limit);
+
+        return response()->json([
+            'success' => true,
+            'data' => $suggestions,
+            'query' => $query
+        ]);
+    }
+
+    /**
+     * Popüler aramalar API
+     */
+    public function popularSearches()
+    {
+        $popular = $this->searchService->getPopularSearches();
+
+        return response()->json([
+            'success' => true,
+            'data' => $popular
+        ]);
+    }
+
+    /**
      * Arama API
      */
     public function search(Request $request)

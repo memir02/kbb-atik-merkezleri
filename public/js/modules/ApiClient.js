@@ -114,6 +114,46 @@ export class ApiClient {
     }
 
     /**
+     * Arama önerileri API
+     */
+    async searchSuggestions(query, limit = 5) {
+        try {
+            const params = new URLSearchParams();
+            params.append('q', query);
+            params.append('limit', limit);
+
+            const response = await fetch(`${this.baseUrl}/search/suggestions?${params}`);
+            if (!response.ok) {
+                throw new Error('Öneri alma başarısız');
+            }
+            
+            const data = await response.json();
+            return data.data || [];
+        } catch (error) {
+            console.error('API Error (suggestions):', error);
+            return [];
+        }
+    }
+
+    /**
+     * Popüler aramalar API
+     */
+    async popularSearches() {
+        try {
+            const response = await fetch(`${this.baseUrl}/search/popular`);
+            if (!response.ok) {
+                throw new Error('Popüler aramalar alma başarısız');
+            }
+            
+            const data = await response.json();
+            return data.data || [];
+        } catch (error) {
+            console.error('API Error (popular searches):', error);
+            return [];
+        }
+    }
+
+    /**
      * Arama API
      */
     async search(searchTerm, filters = []) {

@@ -37,6 +37,14 @@ Route::prefix('atik-merkezleri')->group(function () {
     // Genel arama
     Route::get('/search', [AtikMerkeziController::class, 'search'])
         ->name('api.atik-merkezleri.search');
+    
+    // Arama önerileri
+    Route::get('/search/suggestions', [AtikMerkeziController::class, 'suggestions'])
+        ->name('api.atik-merkezleri.suggestions');
+    
+    // Popüler aramalar
+    Route::get('/search/popular', [AtikMerkeziController::class, 'popularSearches'])
+        ->name('api.atik-merkezleri.popular-searches');
 });
 
 // Eski uyumluluk için - Deprecated
