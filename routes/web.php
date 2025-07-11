@@ -1,11 +1,11 @@
 <?php
 
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\Web\AtikMerkeziController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', function () {
-    return view('welcome');
-});
+Route::get('/', [AtikMerkeziController::class, 'index'])->name('atik-merkezleri.index');
+Route::get('/konuma-gore', [AtikMerkeziController::class, 'konumaGore'])->name('atik-merkezleri.konuma-gore');
 
 Route::get('/dashboard', function () {
     return view('dashboard');
