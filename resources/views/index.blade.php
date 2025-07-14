@@ -860,14 +860,10 @@
             }, 1000);
         });
         
-        // Rating modal fonksiyonu
+        // Rating modal fonksiyonu - TEMİZ VE BACKDROP-SAFE
         function showRatingModal(merkezId) {
-            
-            // Mevcut modal varsa kaldır
-            const existingModal = document.getElementById('ratingModal');
-            if (existingModal) {
-                existingModal.remove();
-            }
+            // Önce mevcut modal'ları ve backdrop'ları temizle
+            cleanupModals();
             
             // Modal HTML oluştur
             const modalHtml = `
@@ -878,7 +874,7 @@
                                 <h5 class="modal-title" id="ratingModalLabel">
                                     <i class="fas fa-star text-warning me-2"></i>Merkezi Puanla
                                 </h5>
-                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                <button type="button" class="btn-close" onclick="closeRatingModal()" aria-label="Close"></button>
                             </div>
                             <div class="modal-body">
                                 <div class="text-center mb-4">
@@ -903,7 +899,7 @@
                                 <input type="hidden" id="ratingMerkezId" value="${merkezId}">
                             </div>
                             <div class="modal-footer">
-                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                <button type="button" class="btn btn-secondary" onclick="closeRatingModal()">
                                     <i class="fas fa-times me-1"></i>İptal
                                 </button>
                                 <button type="button" class="btn btn-primary" id="submitRating">
@@ -918,6 +914,24 @@
             // DOM'a ekle
             document.body.insertAdjacentHTML('beforeend', modalHtml);
             
+            // Event listener'ları ekle
+            setupRatingModalEvents(merkezId);
+            
+            // Modal'ı göster - sadece Bootstrap kullan
+            const modalElement = document.getElementById('ratingModal');
+            const modal = new bootstrap.Modal(modalElement, {
+                backdrop: true,
+                keyboard: true
+            });
+            
+            // Modal kapatma event listener ekle
+            modalElement.addEventListener('hidden.bs.modal', cleanupModals);
+            
+            modal.show();
+        }
+        
+        // Modal event listener'larını kurma
+        function setupRatingModalEvents(merkezId) {
             // Star click events
             document.querySelectorAll('#modalRatingStars .rating-star').forEach(star => {
                 star.addEventListener('click', function() {
@@ -949,55 +963,46 @@
                 
                 submitRating(merkezId, rating, comment);
             });
+        }
+        
+        // Modal'ı güvenle kapat
+        function closeRatingModal() {
+            const modalElement = document.getElementById('ratingModal');
+            if (modalElement) {
+                const modal = bootstrap.Modal.getInstance(modalElement);
+                if (modal) {
+                    modal.hide();
+                }
+            }
+            // Her durumda cleanup yap
+            setTimeout(cleanupModals, 300);
+        }
+        
+        // Tüm modal ve backdrop'ları temizle
+        function cleanupModals() {
+            // Mevcut rating modal'ı kaldır
+            const existingModal = document.getElementById('ratingModal');
+            if (existingModal) {
+                const modal = bootstrap.Modal.getInstance(existingModal);
+                if (modal) {
+                    modal.dispose();
+                }
+                existingModal.remove();
+            }
             
-                         // Modal'ı göster
-             
-             try {
-                 const modalElement = document.getElementById('ratingModal');
-                 
-                                   if (typeof bootstrap === 'undefined') {
-                      console.error('Bootstrap not loaded');
-                      return;
-                  }
-                  
-                  const modal = new bootstrap.Modal(modalElement);
-                  modal.show();
-                 
-                 // Fallback: Manuel olarak göster
-                 setTimeout(() => {
-                                           if (!modalElement.classList.contains('show')) {
-                          
-                          // Manuel gösterme - güçlü CSS
-                          modalElement.style.display = 'block !important';
-                          modalElement.style.position = 'fixed';
-                          modalElement.style.top = '50%';
-                          modalElement.style.left = '50%';
-                          modalElement.style.transform = 'translate(-50%, -50%)';
-                          modalElement.style.zIndex = '99999';
-                          modalElement.style.backgroundColor = 'rgba(0,0,0,0.5)';
-                          modalElement.classList.add('show');
-                          document.body.classList.add('modal-open');
-                          
-                          // Backdrop ekle
-                          const backdrop = document.createElement('div');
-                          backdrop.className = 'modal-backdrop fade show';
-                          backdrop.style.zIndex = '99998';
-                          document.body.appendChild(backdrop);
-                          
-
-                          
-                                      }
-                 }, 100);
-                 
-             } catch (error) {
-                 console.error('❌ Modal error:', error);
-                 alert('Modal hatası: ' + error.message);
-             }
+            // Tüm backdrop'ları kaldır
+            document.querySelectorAll('.modal-backdrop').forEach(backdrop => {
+                backdrop.remove();
+            });
+            
+            // Body'den modal sınıflarını kaldır
+            document.body.classList.remove('modal-open');
+            document.body.style.overflow = '';
+            document.body.style.paddingRight = '';
         }
         
         // Rating submit fonksiyonu
         function submitRating(merkezId, rating, comment) {
-            
             fetch('/api/ratings', {
                 method: 'POST',
                 headers: {
@@ -1017,9 +1022,8 @@
                 if (data.success || data.average_rating !== undefined) {
                     alert('Puanınız başarıyla kaydedildi!');
                     
-                    // Modal'ı kapat
-                    const modal = bootstrap.Modal.getInstance(document.getElementById('ratingModal'));
-                    modal.hide();
+                    // Modal'ı güvenle kapat
+                    closeRatingModal();
                     
                     // Sayfayı yenile (rating'leri güncellemek için)
                     setTimeout(() => location.reload(), 1000);
