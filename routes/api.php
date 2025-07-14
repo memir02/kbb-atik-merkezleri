@@ -3,6 +3,7 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AtikMerkeziController;
+use App\Http\Controllers\RatingController;
 
 /*
 |--------------------------------------------------------------------------
@@ -45,6 +46,15 @@ Route::prefix('atik-merkezleri')->group(function () {
     // Popüler aramalar
     Route::get('/search/popular', [AtikMerkeziController::class, 'popularSearches'])
         ->name('api.atik-merkezleri.popular-searches');
+});
+
+// Rating API Routes (moved to web.php for session-based authentication)
+
+// Rating API Routes (legacy - with merkez in URL)
+Route::prefix('atik-merkezleri/{atikMerkezi}')->middleware('auth')->group(function () {
+    Route::post('/rate', [RatingController::class, 'rate']);
+    Route::post('/favorite', [RatingController::class, 'addToFavorites']);
+    Route::delete('/favorite', [RatingController::class, 'removeFromFavorites']);
 });
 
 // Eski uyumluluk için - Deprecated

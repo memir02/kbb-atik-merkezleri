@@ -154,22 +154,19 @@ export class ModalModule {
                                     
                                     <h6 class="text-muted mb-3"><i class="fas fa-map-marker-alt me-2"></i>Adres</h6>
                                     <p class="mb-3">${merkez.adres}</p>
-        `;
-        
-        // Konum bilgisi varsa ekle
-        if (merkez.lat && merkez.lon) {
-            detayHtml += `
-                                    <h6 class="text-muted mb-3"><i class="fas fa-globe me-2"></i>Konum Koordinatları</h6>
-                                    <p class="mb-3">
-                                        <span class="badge bg-secondary me-2">Enlem: ${parseFloat(merkez.lat).toFixed(6)}°</span>
-                                        <span class="badge bg-secondary">Boylam: ${parseFloat(merkez.lon).toFixed(6)}°</span>
-                                    </p>
-            `;
-        }
-        
-        detayHtml += `
+                                    
+                                    <!-- Rating Widget -->
+                                    <div class="rating-widget mt-3" data-merkez-id="${merkez.id}">
+                                        <h6 class="text-muted mb-2"><i class="fas fa-star me-2"></i>Değerlendirme</h6>
+                                        <div class="rating-display">
+                                            ${this.generateRatingDisplay(merkez)}
+                                        </div>
+                                    </div>
                                 </div>
                                 <div class="col-md-4">
+        `;
+        
+        detayHtml += `
                                     <div class="text-center">
         `;
         
@@ -191,19 +188,6 @@ export class ModalModule {
                                         <button class="btn btn-primary btn-lg w-100 mb-3" onclick="window.modalModule.switchToMapTab()">
                                             <i class="fas fa-map me-2"></i>Haritada Göster
                                         </button>
-            `;
-        }
-        
-        // Kullanıcı konumu varsa ekle
-        if (userLat && userLon) {
-            detayHtml += `
-                                        <div class="alert alert-info">
-                                            <h6 class="mb-2"><i class="fas fa-user-circle me-2"></i>Konumunuz</h6>
-                                            <small>
-                                                Enlem: ${userLat.toFixed(6)}°<br>
-                                                Boylam: ${userLon.toFixed(6)}°
-                                            </small>
-                                        </div>
             `;
         }
         
@@ -271,20 +255,13 @@ export class ModalModule {
                             </div>
                             ` : ''}
                             
-                            ${merkez.lat && merkez.lon ? `
-                            <div class="mt-2">
-                                <small class="text-muted">
-                                    Enlem: ${parseFloat(merkez.lat).toFixed(4)}° | 
-                                    Boylam: ${parseFloat(merkez.lon).toFixed(4)}°
-                                </small>
+                            <!-- Rating Widget -->
+                            <div class="rating-widget mt-3" data-merkez-id="${merkez.id}">
+                                <div class="rating-display">
+                                    ${this.generateRatingDisplay(merkez)}
+                                </div>
                             </div>
-                            ` : `
-                            <div class="mt-2">
-                                <small class="text-warning">
-                                    <i class="fas fa-exclamation-triangle me-1"></i>Konum bilgisi bulunamadı
-                                </small>
-                            </div>
-                            `}
+ 
                         </div>
                     </div>
                 </div>
@@ -293,6 +270,53 @@ export class ModalModule {
         
         detayHtml += `</div>`;
         detayContainer.innerHTML = detayHtml;
+    }
+
+    /**
+     * Rating display HTML'i generate et
+     */
+    generateRatingDisplay(merkez) {
+        if (merkez.total_ratings && merkez.total_ratings > 0) {
+            // Yıldızları generate et
+            const stars = this.generateStars(merkez.average_rating || 0);
+            return `
+                <div class="d-flex align-items-center">
+                    <div class="stars-display me-2">
+                        ${stars}
+                    </div>
+                    <small class="text-muted">
+                        ${parseFloat(merkez.average_rating || 0).toFixed(1)} (${merkez.total_ratings} değerlendirme)
+                    </small>
+                </div>
+            `;
+        } else {
+            return `
+                <div class="text-muted small">
+                    <i class="fas fa-star text-muted me-1"></i>Henüz değerlendirilmemiş
+                </div>
+            `;
+        }
+    }
+
+    /**
+     * Yıldız HTML'i generate et
+     */
+    generateStars(rating) {
+        let stars = '';
+        const fullStars = Math.floor(rating);
+        const hasHalfStar = (rating % 1) >= 0.5;
+        
+        for (let i = 1; i <= 5; i++) {
+            if (i <= fullStars) {
+                stars += '<i class="fas fa-star text-warning" style="font-size: 0.9rem;"></i>';
+            } else if (i === fullStars + 1 && hasHalfStar) {
+                stars += '<i class="fas fa-star-half-alt text-warning" style="font-size: 0.9rem;"></i>';
+            } else {
+                stars += '<i class="far fa-star text-muted" style="font-size: 0.9rem;"></i>';
+            }
+        }
+        
+        return stars;
     }
 
     /**

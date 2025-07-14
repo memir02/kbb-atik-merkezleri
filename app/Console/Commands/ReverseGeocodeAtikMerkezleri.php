@@ -29,8 +29,8 @@ class ReverseGeocodeAtikMerkezleri extends Command
                 'addressdetails' => 1,
             ]);
 
-            if ($response->successful() && isset($response['display_name'])) {
-                $merkez->adres = $response['display_name'];
+            if ($response->successful() && isset($response->json()['display_name'])) {
+                $merkez->adres = $response->json()['display_name'];
                 $merkez->save();
                 $this->info("✅ Adres kaydedildi: {$merkez->adres}");
                 sleep(1); // Nominatim rate limit koruması

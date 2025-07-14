@@ -83,8 +83,7 @@ export class MapModule {
 
         const defaultPopup = `
             <div class="text-center">
-                <b class="text-danger"><i class="fas fa-user-circle me-1"></i>Konumunuz</b><br>
-                <small class="text-muted">Enlem: ${lat.toFixed(6)}°<br>Boylam: ${lon.toFixed(6)}°</small>
+                <b class="text-danger"><i class="fas fa-user-circle me-1"></i>Konumunuz</b>
             </div>
         `;
 

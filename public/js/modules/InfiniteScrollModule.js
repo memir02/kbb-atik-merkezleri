@@ -48,22 +48,24 @@ export class InfiniteScrollModule {
     }
 
     /**
-     * Yeni merkezleri DOM'a ekle
+     * Merkezleri DOM'a ekle
      */
     appendMerkezlerToDOM(merkezler) {
         const container = document.getElementById('allMerkezlerContainer');
         if (!container) return;
 
-        merkezler.forEach(merkez => {
-            const colDiv = document.createElement('div');
-            colDiv.className = 'col';
-            colDiv.innerHTML = this.createMerkezCardHTML(merkez);
-            container.appendChild(colDiv);
+        const cols = merkezler.map(merkez => {
+            return `<div class="col">${this.createMerkezCardHTML(merkez)}</div>`;
         });
 
-        // Yeni card'lar için event listener ekle
-        if (this.selectionModule) {
-            this.selectionModule.attachEventListenersToNewCards(container);
+        container.insertAdjacentHTML('beforeend', cols.join(''));
+        
+        // Initialize rating displays for newly added centers
+        if (window.ratingModule && window.ratingModule.initializeRatingDisplays) {
+            // Small delay to ensure DOM is ready
+            setTimeout(() => {
+                window.ratingModule.initializeRatingDisplays();
+            }, 100);
         }
     }
 
@@ -72,6 +74,8 @@ export class InfiniteScrollModule {
      */
     createMerkezCardHTML(merkez) {
         const borderClass = merkez.border_class || 'border-secondary';
+        const isLoggedIn = window.userLoggedIn || false;
+        
         return `
             <div class="card ${borderClass} h-100 selectable-card position-relative" data-merkez-id="${merkez.id}" style="cursor: pointer; transition: all 0.3s ease;">
                 <div class="card-body">
@@ -80,7 +84,21 @@ export class InfiniteScrollModule {
                     </div>
                     <h5 class="card-title pe-5">${merkez.title}</h5>
                     <p class="card-text">${merkez.content}</p>
-                    <small class="text-muted">Adres: ${merkez.adres || 'Belirtilmemiş'}</small>
+                    <small class="text-muted">
+                        <i class="fas fa-map-marker-alt me-1"></i>${merkez.adres || 'Belirtilmemiş'}
+                    </small>
+                    
+                    <!-- Rating Widget -->
+                    <div class="rating-widget mt-3" onclick="event.stopPropagation()">
+                        <div class="d-flex align-items-center justify-content-between">
+                            <div class="rating-display">
+                                ${this.generateRatingDisplay(merkez)}
+                            </div>
+                            <div class="rating-actions d-flex gap-1">
+                                ${this.generateRatingActions(merkez.id, isLoggedIn)}
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 <div class="map-button-container position-absolute" style="bottom: 10px; right: 10px; display: none;">
                     <button class="btn btn-success btn-sm haritada-goster-btn" data-merkez-id="${merkez.id}">
@@ -89,6 +107,77 @@ export class InfiniteScrollModule {
                 </div>
             </div>
         `;
+    }
+
+    /**
+     * Rating display HTML'i generate et
+     */
+    generateRatingDisplay(merkez) {
+        if (merkez.total_ratings && merkez.total_ratings > 0) {
+            const stars = this.generateStars(merkez.average_rating || 0);
+            return `
+                <div class="d-flex align-items-center">
+                    <div class="stars-display me-2">
+                        ${stars}
+                    </div>
+                    <small class="text-muted">
+                        ${parseFloat(merkez.average_rating || 0).toFixed(1)} (${merkez.total_ratings} değerlendirme)
+                    </small>
+                </div>
+            `;
+        } else {
+            return `
+                <div class="text-muted small">
+                    <i class="fas fa-star text-muted me-1"></i>Henüz değerlendirilmemiş
+                </div>
+            `;
+        }
+    }
+
+    /**
+     * Rating action buttons HTML'i generate et
+     */
+    generateRatingActions(merkezId, isLoggedIn) {
+        if (isLoggedIn) {
+            return `
+                <button class="btn btn-sm btn-outline-danger favorite-btn" data-merkez-id="${merkezId}" title="Favorilere ekle">
+                    <i class="far fa-heart"></i>
+                </button>
+                <button class="btn btn-sm btn-outline-primary rate-btn" data-merkez-id="${merkezId}" title="Puanla">
+                    <i class="fas fa-star"></i>
+                </button>
+            `;
+        } else {
+            return `
+                <a href="/login" class="btn btn-sm btn-outline-danger" title="Favorilere eklemek için giriş yap">
+                    <i class="far fa-heart"></i>
+                </a>
+                <a href="/login" class="btn btn-sm btn-outline-primary" title="Puanlamak için giriş yap">
+                    <i class="fas fa-star"></i>
+                </a>
+            `;
+        }
+    }
+
+    /**
+     * Yıldız HTML'i generate et
+     */
+    generateStars(rating) {
+        let stars = '';
+        const fullStars = Math.floor(rating);
+        const hasHalfStar = (rating % 1) >= 0.5;
+        
+        for (let i = 1; i <= 5; i++) {
+            if (i <= fullStars) {
+                stars += '<i class="fas fa-star text-warning" style="font-size: 0.9rem;"></i>';
+            } else if (i === fullStars + 1 && hasHalfStar) {
+                stars += '<i class="fas fa-star-half-alt text-warning" style="font-size: 0.9rem;"></i>';
+            } else {
+                stars += '<i class="far fa-star text-muted" style="font-size: 0.9rem;"></i>';
+            }
+        }
+        
+        return stars;
     }
 
     /**

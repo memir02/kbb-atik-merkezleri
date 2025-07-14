@@ -44,21 +44,22 @@ class SearchService
      * Filtre değerlerini gerçek content değerleriyle eşleştir
      */
     private const FILTER_MAPPINGS = [
-        'plastik' => ['MOBİL ATIK GETİRME MERKEZİ', 'ATIK GEÇİCİ DEPOLAMA ÜNİTESİ'],
-        'metal' => ['MOBİL ATIK GETİRME MERKEZİ', 'ATIK GEÇİCİ DEPOLAMA ÜNİTESİ'],
-        'cam' => ['MOBİL ATIK GETİRME MERKEZİ', 'ATIK GEÇİCİ DEPOLAMA ÜNİTESİ', 'ATIK CAM'],
-        'kağıt' => ['MOBİL ATIK GETİRME MERKEZİ', 'ATIK GEÇİCİ DEPOLAMA ÜNİTESİ'],
-        'kagit' => ['MOBİL ATIK GETİRME MERKEZİ', 'ATIK GEÇİCİ DEPOLAMA ÜNİTESİ'],
-        'pil' => ['MOBİL ATIK GETİRME MERKEZİ'],
-        'bitkisel' => ['BİTKİSEL ATIK YAĞ'],
+        'mobil' => ['MOBİL ATIK GETİRME MERKEZİ', 'MOBIL ATIK GETIRME MERKEZI'],
+        'plastik' => ['MOBİL ATIK GETİRME MERKEZİ', 'ATIK GEÇİCİ DEPOLAMA ÜNİTESİ', 'PLASTIK'],
+        'metal' => ['MOBİL ATIK GETİRME MERKEZİ', 'ATIK GEÇİCİ DEPOLAMA ÜNİTESİ', 'METAL'],
+        'cam' => ['MOBİL ATIK GETİRME MERKEZİ', 'ATIK GEÇİCİ DEPOLAMA ÜNİTESİ', 'ATIK CAM', 'CAM'],
+        'kağıt' => ['MOBİL ATIK GETİRME MERKEZİ', 'ATIK GEÇİCİ DEPOLAMA ÜNİTESİ', 'KAĞIT', 'KAGIT'],
+        'kagit' => ['MOBİL ATIK GETİRME MERKEZİ', 'ATIK GEÇİCİ DEPOLAMA ÜNİTESİ', 'KAĞIT', 'KAGIT'],
+        'pil' => ['MOBİL ATIK GETİRME MERKEZİ', 'PİL', 'PIL'],
+        'bitkisel' => ['BİTKİSEL ATIK YAĞ', 'BITKISEL ATIK YAG'],
         'atıkcam' => ['ATIK CAM'],
-        'tekstil' => ['TEKSTİL KUMBARASI'],
-        'gecici' => ['ATIK GEÇİCİ DEPOLAMA ÜNİTESİ'],
-        'ilac' => ['ATIK İLAÇ'],
-        'ilaç' => ['ATIK İLAÇ'],
-        'sinif1' => ['1. SINIF ATIK GETİRME MERKEZİ'],
-        'inert' => ['İNERT ATIK'],
-        'hafriyat' => ['HAFRİYAT']
+        'tekstil' => ['TEKSTİL KUMBARASI', 'TEKSTIL KUMBARASI', 'TEKSTİL', 'TEKSTIL'],
+        'gecici' => ['ATIK GEÇİCİ DEPOLAMA ÜNİTESİ', 'GECICI DEPOLAMA'],
+        'ilac' => ['ATIK İLAÇ', 'ATIK ILAC', 'İLAÇ', 'ILAC'],
+        'ilaç' => ['ATIK İLAÇ', 'ATIK ILAC', 'İLAÇ', 'ILAC'],
+        'sinif1' => ['1. SINIF ATIK GETİRME MERKEZİ', '1. SINIF', 'SINIF'],
+        'inert' => ['İNERT ATIK', 'INERT ATIK'],
+        'hafriyat' => ['HAFRİYAT', 'HAFRIYAT']
     ];
 
     /**
@@ -231,7 +232,8 @@ class SearchService
 
         $cacheKey = 'filters_' . implode('_', $filters);
         
-        return Cache::remember($cacheKey, 600, function() use ($filters) {
+        // AKILLI CACHE SİSTEMİ - Sadece ID'leri cache'le, packet limiti güvenli
+        $cachedIds = Cache::remember($cacheKey, 600, function() use ($filters) {
             $query = AtikMerkezi::query();
             
             $query->where(function ($q) use ($filters) {
@@ -248,8 +250,18 @@ class SearchService
                 }
             });
             
-            return $query->get();
+            // Sadece ID'leri al ve cache'le (küçük boyut, packet safe)
+            return $query->pluck('id')->toArray();
         });
+        
+        // Cache'ten gelen ID'lerle asıl verileri fetch et
+        if (empty($cachedIds)) {
+            return collect();
+        }
+        
+        $results = AtikMerkezi::whereIn('id', $cachedIds)->get();
+        
+        return $results;
     }
 
     /**
@@ -331,14 +343,6 @@ class SearchService
      */
     public function logSearchStats(string $query, int $resultCount, float $executionTime): void
     {
-        // Development ortamında log
-        if (config('app.debug')) {
-            Log::info('Search performed', [
-                'query' => $query,
-                'result_count' => $resultCount,
-                'execution_time_ms' => round($executionTime * 1000, 2),
-                'timestamp' => now()
-            ]);
-        }
+        // Production'da log devre dışı - gerekirse analytics sistemi eklenebilir
     }
 } 

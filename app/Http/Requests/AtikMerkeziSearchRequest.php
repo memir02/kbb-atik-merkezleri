@@ -22,10 +22,10 @@ class AtikMerkeziSearchRequest extends FormRequest
         return [
             'search' => 'nullable|string|min:2|max:100',
             'filter' => 'nullable|array',
-            'filter.*' => 'string|in:mobil,bitkisel,cam,tekstil,gecici,ilac,sinif1,inert,hafriyat',
+            'filter.*' => 'string|in:mobil,plastik,metal,cam,kagit,pil,bitkisel,atıkcam,tekstil,gecici,ilac,sinif1,inert,hafriyat',
             'q' => 'nullable|string|min:2|max:100', // API için
             'filters' => 'nullable|array', // API için
-            'filters.*' => 'string|in:mobil,bitkisel,cam,tekstil,gecici,ilac,sinif1,inert,hafriyat',
+            'filters.*' => 'string|in:mobil,plastik,metal,cam,kagit,pil,bitkisel,atıkcam,tekstil,gecici,ilac,sinif1,inert,hafriyat',
         ];
     }
 

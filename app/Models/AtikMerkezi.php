@@ -19,10 +19,72 @@ class AtikMerkezi extends Model
         'content',
         'lat',
         'lon',
+        'adres',
     ];
 
     // JSON serialization'da getter attribute'ları dahil et
-    protected $appends = ['border_class'];
+    protected $appends = ['border_class', 'average_rating', 'total_ratings', 'star_rating_html'];
+
+    /**
+     * Ratings relationship
+     */
+    public function ratings()
+    {
+        return $this->hasMany(AtikMerkeziRating::class);
+    }
+
+    /**
+     * Favorites relationship
+     */
+    public function favorites()
+    {
+        return $this->hasMany(AtikMerkeziFavorite::class);
+    }
+
+    /**
+     * Average rating getter
+     */
+    public function getAverageRatingAttribute()
+    {
+        return $this->ratings()->avg('rating') ?: 0;
+    }
+
+    /**
+     * Total ratings count getter
+     */
+    public function getTotalRatingsAttribute()
+    {
+        return $this->ratings()->count();
+    }
+
+    /**
+     * Star rating HTML getter
+     */
+    public function getStarRatingHtmlAttribute()
+    {
+        $average = $this->average_rating;
+        $total = $this->total_ratings;
+        
+        if ($total == 0) {
+            return '<small class="text-muted"><i class="fas fa-star text-muted me-1"></i>Henüz değerlendirilmemiş</small>';
+        }
+
+        $stars = '';
+        $fullStars = floor($average);
+        $hasHalfStar = ($average - $fullStars) >= 0.5;
+
+        for ($i = 1; $i <= 5; $i++) {
+            if ($i <= $fullStars) {
+                $stars .= '<i class="fas fa-star text-warning" style="font-size: 0.9rem;"></i>';
+            } elseif ($i == $fullStars + 1 && $hasHalfStar) {
+                $stars .= '<i class="fas fa-star-half-alt text-warning" style="font-size: 0.9rem;"></i>';
+            } else {
+                $stars .= '<i class="far fa-star text-muted" style="font-size: 0.9rem;"></i>';
+            }
+        }
+
+        return $stars . ' <small class="text-muted ms-1">(' . number_format($average, 1) . ' - ' . $total . ' değerlendirme)</small>';
+    }
 
     /**
      * content alanı set edilirken HTML etiketlerini kaldır.

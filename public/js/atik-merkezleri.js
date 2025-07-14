@@ -16,6 +16,7 @@ import { ModalModule } from './modules/ModalModule.js';
 import { GeolocationModule } from './modules/GeolocationModule.js';
 import { InfiniteScrollModule } from './modules/InfiniteScrollModule.js';
 import { AutocompleteModule } from './modules/AutocompleteModule.js';
+import { RatingModule } from './modules/RatingModule.js';
 
 /**
  * Ana uygulama sınıfı
@@ -67,6 +68,9 @@ class AtikMerkezleriApp {
         this.modules.geolocation = new GeolocationModule();
         this.modules.infiniteScroll = new InfiniteScrollModule(this.modules.api, this.modules.selection);
         this.modules.autocomplete = new AutocompleteModule(this.modules.api);
+        // RatingModule disabled - using inline rating system instead
+        // this.modules.rating = new RatingModule();
+        console.log('RatingModule disabled, using inline rating system');
     }
 
     /**
@@ -191,6 +195,7 @@ class AtikMerkezleriApp {
         window.geolocationModule = this.modules.geolocation;
         window.infiniteScrollModule = this.modules.infiniteScroll;
         window.autocompleteModule = this.modules.autocomplete;
+        // window.ratingModule = this.modules.rating; // Disabled - using inline rating system
         
         // Ana app referansı
         window.atikMerkezleriApp = this;
