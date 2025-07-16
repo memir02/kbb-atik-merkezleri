@@ -28,14 +28,13 @@
                 const merkezId = rateBtn.dataset.merkezId;
                 
                 if (!window.userLoggedIn) {
-                    alert('Puanlama yapmak için giriş yapmalısınız!');
+                    showBootstrapAlert('Puanlama yapmak için giriş yapmalısınız!', 'warning');
                     return;
                 }
                 
                 showRatingModal(merkezId);
             }
         });
-        
         // ALTERNATIF: Direkt button'lara listener ekle
         setTimeout(() => {
             const rateButtons = document.querySelectorAll('.rate-btn');
@@ -46,7 +45,7 @@
                     e.stopPropagation();
                     
                     if (!window.userLoggedIn) {
-                        alert('Puanlama yapmak için giriş yapmalısınız!');
+                        showBootstrapAlert('Puanlama yapmak için giriş yapmalısınız!', 'warning');
                         return;
                     }
                     
@@ -153,7 +152,7 @@
             const comment = document.getElementById('ratingComment').value;
             
             if (!rating || rating < 1) {
-                alert('Lütfen bir puan seçin!');
+                showBootstrapAlert('Lütfen bir puan seçin!', 'warning');
                 return;
             }
             
@@ -216,7 +215,7 @@
         .then(response => response.json())
         .then(data => {
             if (data.success || data.average_rating !== undefined) {
-                alert('Puanınız başarıyla kaydedildi!');
+                showBootstrapAlert('Puanınız başarıyla kaydedildi!', 'success');
                 
                 // Modal'ı güvenle kapat
                 closeRatingModal();
@@ -224,13 +223,40 @@
                 // Sayfayı yenile (rating'leri güncellemek için)
                 setTimeout(() => location.reload(), 1000);
             } else {
-                alert('Hata: ' + (data.message || 'Bilinmeyen hata'));
+                showBootstrapAlert('Hata: ' + (data.message || 'Bilinmeyen hata'), 'danger');
             }
         })
         .catch(error => {
             console.error('Rating submit error:', error);
-            alert('Bir hata oluştu!');
+            showBootstrapAlert('Bir hata oluştu!', 'danger');
         });
+    }
+
+    // Bootstrap alert helper
+    function showBootstrapAlert(message, type = 'success') {
+        // Remove any existing alert
+        const existingAlert = document.getElementById('custom-bootstrap-alert');
+        if (existingAlert) existingAlert.remove();
+
+        // Create alert div
+        const alertDiv = document.createElement('div');
+        alertDiv.id = 'custom-bootstrap-alert';
+        alertDiv.className = `alert alert-${type} alert-dismissible fade show position-fixed top-0 start-50 translate-middle-x mt-3`;
+        alertDiv.style.zIndex = '9999';
+        alertDiv.style.minWidth = '300px';
+        alertDiv.role = 'alert';
+        alertDiv.innerHTML = `
+            <span>${message}</span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        `;
+        document.body.appendChild(alertDiv);
+        // Auto-dismiss after 3 seconds
+        setTimeout(() => {
+            if (alertDiv) {
+                alertDiv.classList.remove('show');
+                setTimeout(() => alertDiv.remove(), 300);
+            }
+        }, 3000);
     }
 
     // Modal form submission fix - Button click approach
@@ -247,7 +273,7 @@
                 
                 // Eğer hiç filtre seçilmemişse uyarı ver
                 if (checkedFilters.length === 0) {
-                    alert('Lütfen en az bir filtre seçin!');
+                    showBootstrapAlert('Lütfen en az bir filtre seçin!', 'warning');
                     return false;
                 }
                 
