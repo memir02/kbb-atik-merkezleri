@@ -55,7 +55,9 @@ Route::get('/debug-form', function() {
 });
 
 Route::get('/dashboard', function () {
-    return view('dashboard');
+    $user = request()->user();
+    $ratings = $user->ratings()->with('atikMerkezi')->get();
+    return view('dashboard', compact('ratings'));
 })->middleware(['auth'])->name('dashboard');
 
 Route::middleware('auth')->group(function () {

@@ -12,11 +12,35 @@
                   <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
                       {{ __("Yorumlarım") }}
                   </button>
+                  <ul class="dropdown-menu">
+                    @forelse($ratings as $rating)
+                      <li class="dropdown-item">
+                      {{ $rating->atikMerkezi->title ?? 'Merkez' }}:
+                        <strong>
+                            {{$rating->comment}}
+                        </strong>
+                      </li>
+                    @empty
+                      <li class="dropdown-item text-muted">Henüz puan vermediniz.</li>
+                    @endforelse
+                  </ul>
                 </div>
                 <div class="p-6" style="color: #ffffff;">
                   <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
                       {{ __("Puanlarım") }}
                   </button>
+                  <ul class="dropdown-menu">
+                    @forelse($ratings as $rating)
+                      <li class="dropdown-item">
+                      {{ $rating->atikMerkezi->title ?? 'Merkez' }}:
+                        <strong>
+                            {{ str_repeat('⭐', $rating->rating) }}
+                        </strong>
+                      </li>
+                    @empty
+                      <li class="dropdown-item text-muted">Henüz puan vermediniz.</li>
+                    @endforelse
+                  </ul>
                 </div>
                 <div class="p-6" style="color: #ffffff;">
                   <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">

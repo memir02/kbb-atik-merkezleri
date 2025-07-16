@@ -45,4 +45,10 @@ class User extends Authenticatable implements MustVerifyEmail
             'password' => 'hashed',
         ];
     }
+
+    // Kullanıcının verdiği puanlar
+    public function ratings()
+    {
+        return $this->hasMany(\App\Models\AtikMerkeziRating::class);
+    }
 }
