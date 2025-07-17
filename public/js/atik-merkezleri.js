@@ -68,9 +68,6 @@ class AtikMerkezleriApp {
         this.modules.geolocation = new GeolocationModule();
         this.modules.infiniteScroll = new InfiniteScrollModule(this.modules.api, this.modules.selection);
         this.modules.autocomplete = new AutocompleteModule(this.modules.api);
-        // RatingModule disabled - using inline rating system instead
-        // this.modules.rating = new RatingModule();
-        console.log('RatingModule disabled, using inline rating system');
     }
 
     /**

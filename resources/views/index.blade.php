@@ -36,7 +36,8 @@
     'tumMerkezler' => $tumMerkezler ?? null,
     'isLocationSearch' => $isLocationSearch ?? false,
     'userLat' => $userLat ?? null,
-    'userLon' => $userLon ?? null
+    'userLon' => $userLon ?? null,
+    'favoriMerkezler' => $favoriMerkezler ?? []
 ])
 
 {{-- Modaller Component --}}

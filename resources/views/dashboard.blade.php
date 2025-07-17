@@ -14,14 +14,14 @@
                   </button>
                   <ul class="dropdown-menu">
                     @forelse($ratings as $rating)
-                      <li class="dropdown-item">
-                      {{ $rating->atikMerkezi->title ?? 'Merkez' }}:
-                        <strong>
-                            {{$rating->comment}}
-                        </strong>
-                      </li>
+                        @if($rating->comment)
+                            <li class="dropdown-item">
+                                {{ $rating->atikMerkezi->title ?? 'Merkez' }}:
+                                <strong>{{ $rating->comment }}</strong>
+                            </li>
+                        @endif
                     @empty
-                      <li class="dropdown-item text-muted">Henüz puan vermediniz.</li>
+                        <li class="dropdown-item text-muted">Henüz yorum yapmadınız.</li>
                     @endforelse
                   </ul>
                 </div>
@@ -44,8 +44,17 @@
                 </div>
                 <div class="p-6" style="color: #ffffff;">
                   <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                      {{ __("Favori Atık Merkezlerim") }}
+                      {{ __("Favori Atık Merkezlerim") }}                    
                   </button>
+                  <ul class="dropdown-menu">
+                    @forelse($favoriMerkezler as $favorite)
+                      <li class="dropdown-item">
+                      {{ $favorite->atikMerkezi->title ?? 'Merkez' }}
+                      </li>
+                    @empty
+                      <li class="dropdown-item text-muted">Henüz favori atık merkezi eklememişsiniz.</li>
+                    @endforelse
+                  </ul>
             </div>
             </div>
         </div>

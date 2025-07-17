@@ -52,6 +52,20 @@
                     showRatingModal(this.dataset.merkezId);
                 });
             });
+
+            // FAVORİ BUTONLARI İÇİN DE EKLE
+            const favoriteButtons = document.querySelectorAll('.favorite-btn');
+            favoriteButtons.forEach((btn) => {
+                btn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    if (!window.userLoggedIn) {
+                        showBootstrapAlert('Favorilere eklemek için giriş yapmalısınız!', 'warning');
+                        return;
+                    }
+                    toggleFavorite(this.dataset.merkezId, this);
+                });
+            });
         }, 1000);
     });
     
@@ -296,6 +310,57 @@
             console.error('Filter button or form not found!');
         }
     });
+
+    // Favorite button click events
+    document.addEventListener('click', function(e) {
+        const favoriteBtn = e.target.closest('.favorite-btn');
+        if (favoriteBtn) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            const merkezId = favoriteBtn.dataset.merkezId;
+
+            if (!window.userLoggedIn) {
+                showBootstrapAlert('Favorilere eklemek için giriş yapmalısınız!', 'warning');
+                return;
+            }
+
+            toggleFavorite(merkezId, favoriteBtn);
+        }
+    });
+
+    // Favori ekle/çıkar fonksiyonu
+    function toggleFavorite(merkezId, button) {
+        fetch('/api/favorites/toggle', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': window.authToken,
+                'Accept': 'application/json'
+            },
+            credentials: 'same-origin',
+            body: JSON.stringify({
+                atik_merkezi_id: merkezId
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            const icon = button.querySelector('i');
+            if (data.is_favorite) {
+                icon.classList.remove('far');
+                icon.classList.add('fas', 'text-danger');
+                showBootstrapAlert('Favorilere eklendi!', 'success');
+            } else {
+                icon.classList.remove('fas', 'text-danger');
+                icon.classList.add('far');
+                showBootstrapAlert('Favorilerden çıkarıldı!', 'danger');
+            }
+        })
+        .catch(error => {
+            console.error('Favori işlemi hatası:', error);
+            showBootstrapAlert('Bir hata oluştu!', 'danger');
+        });
+    }
 </script>
 
 <!-- ES6 Modules Re-enabled - RatingModule disabled in code -->

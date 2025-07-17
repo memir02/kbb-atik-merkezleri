@@ -57,7 +57,8 @@ Route::get('/debug-form', function() {
 Route::get('/dashboard', function () {
     $user = request()->user();
     $ratings = $user->ratings()->with('atikMerkezi')->get();
-    return view('dashboard', compact('ratings'));
+    $favoriMerkezler = $user->favorites()->with('atikMerkezi')->get();
+    return view('dashboard', compact('ratings', 'favoriMerkezler'));
 })->middleware(['auth'])->name('dashboard');
 
 Route::middleware('auth')->group(function () {
@@ -65,9 +66,12 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
     
-    // Rating API Routes (moved from api.php for session-based auth)
+    // Rating API Routes
     Route::post('/api/ratings', [RatingController::class, 'submitRating'])->name('api.ratings.submit');
     Route::get('/api/ratings/{atikMerkezi}/user-rating', [RatingController::class, 'getUserRating'])->name('api.ratings.user-rating');
+    
+    // Favorites API Route
+    Route::post('/api/favorites/toggle', [RatingController::class, 'toggleFavorite'])->name('api.favorites.toggle');
 });
 
 require __DIR__.'/auth.php';

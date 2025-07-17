@@ -74,7 +74,11 @@
                                             <button class="btn btn-sm btn-outline-danger favorite-btn" 
                                                     data-merkez-id="{{ $merkez->id }}"
                                                     title="Favorilere Ekle">
-                                                <i class="fas fa-heart"></i>
+                                                @if(in_array($merkez->id, $favoriMerkezler ?? []))
+                                                    <i class="fas fa-heart text-danger"></i>
+                                                @else
+                                                    <i class="far fa-heart"></i>
+                                                @endif
                                             </button>
                                             <button class="btn btn-sm btn-outline-primary rate-btn" 
                                                     data-merkez-id="{{ $merkez->id }}"
@@ -166,7 +170,11 @@
                                                 <button class="btn btn-sm btn-outline-danger favorite-btn" 
                                                         data-merkez-id="{{ $merkez->id }}"
                                                         title="Favorilere Ekle">
-                                                    <i class="fas fa-heart"></i>
+                                                    @if(in_array($merkez->id, $favoriMerkezler ?? []))
+                                                        <i class="fas fa-heart text-danger"></i>
+                                                    @else
+                                                        <i class="far fa-heart"></i>
+                                                    @endif
                                                 </button>
                                                 <button class="btn btn-sm btn-outline-primary rate-btn" 
                                                         data-merkez-id="{{ $merkez->id }}"
@@ -265,7 +273,11 @@
                                             <button class="btn btn-sm btn-outline-danger favorite-btn" 
                                                     data-merkez-id="{{ $merkez->id }}"
                                                     title="Favorilere Ekle">
-                                                <i class="fas fa-heart"></i>
+                                                @if(in_array($merkez->id, $favoriMerkezler ?? []))
+                                                    <i class="fas fa-heart text-danger"></i>
+                                                @else
+                                                    <i class="far fa-heart"></i>
+                                                @endif
                                             </button>
                                             <button class="btn btn-sm btn-outline-primary rate-btn" 
                                                     data-merkez-id="{{ $merkez->id }}"
@@ -356,7 +368,11 @@
                                             <button class="btn btn-sm btn-outline-danger favorite-btn" 
                                                     data-merkez-id="{{ $merkez->id }}"
                                                     title="Favorilere Ekle">
-                                                <i class="fas fa-heart"></i>
+                                                @if(in_array($merkez->id, $favoriMerkezler ?? []))
+                                                    <i class="fas fa-heart text-danger"></i>
+                                                @else
+                                                    <i class="far fa-heart"></i>
+                                                @endif
                                             </button>
                                             <button class="btn btn-sm btn-outline-primary rate-btn" 
                                                     data-merkez-id="{{ $merkez->id }}"

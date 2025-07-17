@@ -115,4 +115,41 @@ class RatingController extends Controller
             'message' => 'Favorilerden çıkarıldı',
         ]);
     }
+
+    /**
+     * Favori ekle/çıkar (toggle)
+     */
+    public function toggleFavorite(Request $request)
+    {
+        $request->validate([
+            'atik_merkezi_id' => 'required|exists:atik_merkezleri,id'
+        ]);
+
+        $atikMerkeziId = $request->atik_merkezi_id;
+        $userId = Auth::id();
+
+        $existingFavorite = AtikMerkeziFavorite::where([
+            'user_id' => $userId,
+            'atik_merkezi_id' => $atikMerkeziId
+        ])->first();
+
+        if ($existingFavorite) {
+            $existingFavorite->delete();
+            $isFavorite = false;
+            $message = 'Favorilerden çıkarıldı';
+        } else {
+            AtikMerkeziFavorite::create([
+                'user_id' => $userId,
+                'atik_merkezi_id' => $atikMerkeziId
+            ]);
+            $isFavorite = true;
+            $message = 'Favorilere eklendi';
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => $message,
+            'is_favorite' => $isFavorite
+        ]);
+    }
 }

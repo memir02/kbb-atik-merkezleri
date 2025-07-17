@@ -51,4 +51,9 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         return $this->hasMany(\App\Models\AtikMerkeziRating::class);
     }
+
+    public function favorites()
+    {
+        return $this->hasMany(\App\Models\AtikMerkeziFavorite::class, 'user_id');
+    }
 }

@@ -76,7 +76,15 @@ class AtikMerkeziController extends Controller
             return redirect()->route('atik-merkezleri.index')->with('error', 'Bir hata oluştu. Lütfen tekrar deneyin.');
         }
         
-        return view('index', compact('merkezler', 'tumMerkezler', 'searchTerm'));
+        // Favori merkezler (kullanıcı giriş yaptıysa)
+        $favoriMerkezler = [];
+        if (\Illuminate\Support\Facades\Auth::check()) {
+            $favoriMerkezler = \App\Models\AtikMerkeziFavorite::where('user_id', \Illuminate\Support\Facades\Auth::id())
+                ->pluck('atik_merkezi_id')
+                ->toArray();
+        }
+        
+        return view('index', compact('merkezler', 'tumMerkezler', 'searchTerm', 'favoriMerkezler'));
     }
 
     /**
