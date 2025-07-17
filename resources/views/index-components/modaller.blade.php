@@ -121,6 +121,11 @@
                 <i class="fas fa-map me-2"></i>HARİTA
               </button>
             </li>
+            <li class="nav-item" role="presentation">
+              <button class="nav-link fw-bold" id="yorum-tab" data-bs-toggle="tab" data-bs-target="#yorum-content" type="button" role="tab" aria-controls="yorum-content" aria-selected="false">
+                <i class="fas fa-comment me-2"></i>YORUMLAR
+              </button>
+            </li>
           </ul>
         </div>
         <button type="button" class="btn-close ms-3" data-bs-dismiss="modal" aria-label="Kapat"></button>

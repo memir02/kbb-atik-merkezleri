@@ -1,3 +1,6 @@
+@section('favicon')
+    <link rel="icon" type="image/x-icon" href="{{ asset('images/favicon.png') }}">
+@endsection
 <x-app-layout>
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
@@ -25,5 +28,8 @@
                 </div>
             </div>
         </div>
-    </div>
+    </div>  
+    <script>
+        document.title = "Profilim - Atık Merkezleri";
+    </script>
 </x-app-layout>

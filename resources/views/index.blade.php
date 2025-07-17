@@ -5,7 +5,6 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Konya Büyükşehir Belediyesi Atık Merkezleri</title>
     <link rel="icon" href="{{ asset('favicon.png') }}" type="image/png">
-    
     <!-- Preload critical resources -->
     <link rel="preload" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" as="style">
     

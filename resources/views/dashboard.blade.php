@@ -59,4 +59,7 @@
             </div>
         </div>
     </div>
+    <script>
+        document.title = "Kullanıcı Panelim - Atık Merkezleri";
+    </script>
 </x-app-layout>
