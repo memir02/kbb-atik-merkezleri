@@ -261,6 +261,24 @@ export class ModalModule {
                                     ${this.generateRatingDisplay(merkez)}
                                 </div>
                             </div>
+
+                            <!-- Yorumlar Butonu -->
+                            <button class="btn btn-outline-secondary mb-2" id="showCommentsBtn_${merkez.id}">
+                                <i class="fas fa-comments me-1"></i> Yorumlar
+                            </button>
+
+                            <!-- Comments Section (başta gizli) -->
+                            <div class="comments-section mt-3" data-merkez-id="${merkez.id}" style="display:none">
+                                <h6 class="text-muted mb-2">
+                                    <i class="fas fa-comments me-1"></i>Yorumlar
+                                    <span class="comments-count"></span>
+                                </h6>
+                                <div class="comments-container">
+                                    <div class="comments-loading">
+                                        <i class="fas fa-spinner fa-spin"></i> Yükleniyor...
+                                    </div>
+                                </div>
+                            </div>
  
                         </div>
                     </div>
@@ -270,6 +288,22 @@ export class ModalModule {
         
         detayHtml += `</div>`;
         detayContainer.innerHTML = detayHtml;
+        
+        // Her merkez için yorumlar butonuna tıklanınca yorumları yükle ve göster
+        merkezler.forEach(merkez => {
+            const showBtn = document.getElementById(`showCommentsBtn_${merkez.id}`);
+            if (showBtn) {
+                showBtn.addEventListener('click', () => {
+                    const commentsSection = document.querySelector(`[data-merkez-id='${merkez.id}'].comments-section`);
+                    if (commentsSection.style.display === 'none') {
+                        commentsSection.style.display = 'block';
+                        this.loadComments(merkez.id);
+                    } else {
+                        commentsSection.style.display = 'none';
+                    }
+                });
+            }
+        });
     }
 
     /**
@@ -363,7 +397,20 @@ export class ModalModule {
             // Modal tamamen kapandığında
             mapModal.addEventListener('hidden.bs.modal', () => {
                 this.clearModalData();
-                
+                // Yorumlar içeriğini temizle
+                const yorumContent = document.getElementById('yorum-content-inner');
+                if (yorumContent) yorumContent.innerHTML = '';
+                // Tabları resetle (detay tabı aktif olsun)
+                const detayTab = document.getElementById('detay-tab');
+                const yorumTab = document.getElementById('yorum-tab');
+                const detayContent = document.getElementById('detay-content');
+                const yorumContentTab = document.getElementById('yorum-content');
+                if (detayTab && yorumTab && detayContent && yorumContentTab) {
+                    detayTab.classList.add('active');
+                    yorumTab.classList.remove('active');
+                    detayContent.classList.add('show', 'active');
+                    yorumContentTab.classList.remove('show', 'active');
+                }
                 // Backdrop'u manuel olarak kaldır
                 setTimeout(() => {
                     const backdrop = document.querySelector('.modal-backdrop');
@@ -392,6 +439,136 @@ export class ModalModule {
                     iframe.src = src;
                 }
             });
+        }
+    }
+
+    /**
+     * Yorumları yükle
+     */
+    async loadComments(merkezId) {
+        try {
+            const response = await this.apiClient.get(`/api/atik-merkezleri/${merkezId}/comments`);
+            
+            if (response.success) {
+                this.displayComments(merkezId, response.comments, response.total_comments);
+            } else {
+                this.displayComments(merkezId, [], 0);
+            }
+        } catch (error) {
+            console.error('Error loading comments:', error);
+            this.displayComments(merkezId, [], 0);
+        }
+    }
+
+    /**
+     * Yorumları görüntüle
+     */
+    displayComments(merkezId, comments, totalComments) {
+        const commentsContainer = document.querySelector(`[data-merkez-id="${merkezId}"] .comments-container`);
+        const commentsCount = document.querySelector(`[data-merkez-id="${merkezId}"] .comments-count`);
+        
+        if (!commentsContainer) return;
+
+        if (totalComments === 0) {
+            commentsContainer.innerHTML = `
+                <div class="comments-empty">
+                    <i class="fas fa-comment-slash"></i>
+                    <p class="mb-0">Henüz yorum yapılmamış</p>
+                    <small>İlk yorumu siz yapın!</small>
+                </div>
+            `;
+            if (commentsCount) {
+                commentsCount.textContent = '';
+            }
+        } else {
+            let commentsHtml = '';
+            comments.forEach(comment => {
+                commentsHtml += `
+                    <div class="comment-item">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <div class="d-flex align-items-center">
+                                <div class="stars-display">
+                                    ${comment.stars_html}
+                                </div>
+                                <span class="user-name">${comment.user_name}</span>
+                            </div>
+                            <span class="comment-date">${comment.created_at}</span>
+                        </div>
+                        <p class="comment-text mb-0">${comment.comment}</p>
+                    </div>
+                `;
+            });
+            
+            commentsContainer.innerHTML = commentsHtml;
+            if (commentsCount) {
+                commentsCount.textContent = `(${totalComments})`;
+            }
+        }
+    }
+
+    /**
+     * Yorumları yükle ve #yorum-content içine bas
+     */
+    async loadCommentsToTab() {
+        const modalData = this.getCurrentModalData();
+        let merkezId = null;
+        if (modalData && modalData.type === 'single' && modalData.merkez) {
+            merkezId = modalData.merkez.id;
+        } else if (modalData && modalData.type === 'multiple' && modalData.merkezler && modalData.merkezler.length === 1) {
+            merkezId = modalData.merkezler[0].id;
+        }
+        const yorumContent = document.getElementById('yorum-content-inner');
+        console.log('DEBUG | modalData:', modalData, 'merkezId:', merkezId, 'yorumContent:', yorumContent);
+        if (!yorumContent || !merkezId) {
+            yorumContent.innerHTML = `<div class='comments-empty'>Yorumlar yüklenemedi.</div>`;
+            return;
+        }
+        yorumContent.innerHTML = `<div class='comments-loading'><i class='fas fa-spinner fa-spin'></i> Yorumlar yükleniyor...</div>`;
+        try {
+            const response = await this.apiClient.get(`/api/atik-merkezleri/${merkezId}/comments`);
+            if (response.success) {
+                this.displayCommentsInTab(response.comments, response.total_comments);
+            } else {
+                this.displayCommentsInTab([], 0);
+            }
+        } catch (error) {
+            yorumContent.innerHTML = `<div class='comments-empty'>Yorumlar yüklenirken hata oluştu.</div>`;
+        }
+    }
+
+    /**
+     * Yorumları #yorum-content-inner içinde göster
+     */
+    displayCommentsInTab(comments, totalComments) {
+        const yorumContent = document.getElementById('yorum-content-inner');
+        if (!yorumContent) return;
+        if (totalComments === 0) {
+            yorumContent.innerHTML = `
+                <div class="comments-empty">
+                    <i class="fas fa-comment-slash"></i>
+                    <p class="mb-0">Henüz yorum yapılmamış</p>
+                    <small>İlk yorumu siz yapın!</small>
+                </div>
+            `;
+        } else {
+            let commentsHtml = '';
+            comments.forEach(comment => {
+                commentsHtml += `
+                    <div class="comment-item">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <div class="d-flex align-items-center">
+                                <div class="stars-display">
+                                    ${comment.stars_html}
+                                </div>
+                                <span class="user-name">${comment.user_name}</span>
+                            </div>
+                            <span class="comment-date">${comment.created_at}</span>
+                        </div>
+                        <p class="comment-text mb-0">${comment.comment}</p>
+                    </div>
+                `;
+            });
+            yorumContent.innerHTML = commentsHtml;
         }
     }
 } 

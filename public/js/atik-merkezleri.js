@@ -122,6 +122,16 @@ class AtikMerkezleriApp {
                 }, 100);
             });
         }
+
+        // Yorumlar tab'ı click event'i
+        const yorumTab = document.getElementById('yorum-tab');
+        if (yorumTab) {
+            yorumTab.addEventListener('click', () => {
+                setTimeout(() => {
+                    this.modules.modal.loadCommentsToTab();
+                }, 100);
+            });
+        }
     }
 
     /**

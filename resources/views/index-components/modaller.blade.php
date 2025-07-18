@@ -148,6 +148,12 @@
           <div class="tab-pane fade" id="harita-content" role="tabpanel" aria-labelledby="harita-tab">
             <div id="map" style="height: 500px; width: 100%;"></div>
           </div>
+          <!-- YORUMLAR Tab -->
+          <div class="tab-pane fade" id="yorum-content" role="tabpanel" aria-labelledby="yorum-tab">
+            <div class="p-4" id="yorum-content-inner">
+              <!-- Yorumlar JS ile buraya gelecek -->
+            </div>
+          </div>
         </div>
       </div>
     </div>

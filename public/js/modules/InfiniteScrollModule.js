@@ -99,11 +99,12 @@ export class InfiniteScrollModule {
                             </div>
                         </div>
                     </div>
-                </div>
-                <div class="map-button-container position-absolute" style="bottom: 10px; right: 10px; display: none;">
-                    <button class="btn btn-success btn-sm haritada-goster-btn" data-merkez-id="${merkez.id}">
-                        <i class="fas fa-info-circle me-1"></i> Detay Görüntüle-Haritada Göster
-                    </button>
+                    <br>
+                    <div class="map-button-container position-absolute" style="bottom: 10px; right: 10px; display: none;">
+                        <button class="btn btn-success btn-sm haritada-goster-btn" data-merkez-id="${merkez.id}">
+                            <i class="fas fa-info-circle me-1"></i> Detay Görüntüle-Haritada Göster
+                        </button>
+                    </div>
                 </div>
             </div>
         `;

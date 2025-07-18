@@ -176,4 +176,25 @@ export class ApiClient {
             throw error;
         }
     }
+
+    /**
+     * Genel GET isteği
+     */
+    async get(url) {
+        try {
+            const response = await fetch(url, {
+                headers: {
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': this.csrfToken
+                },
+                credentials: 'same-origin'
+            });
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${url}`);
+            }
+            return await response.json();
+        } catch (error) {
+            throw this.handleApiError(error, 'get');
+        }
+    }
 } 

@@ -152,4 +152,55 @@ class RatingController extends Controller
             'is_favorite' => $isFavorite
         ]);
     }
+
+    /**
+     * Get comments for a specific center
+     */
+    public function getComments(AtikMerkezi $atikMerkezi)
+    {
+        $comments = $atikMerkezi->ratings()
+            ->whereNotNull('comment')
+            ->where('comment', '!=', '')
+            ->with('user:id,name')
+            ->orderBy('created_at', 'desc')
+            ->get()
+            ->map(function ($rating) {
+                return [
+                    'id' => $rating->id,
+                    'comment' => $rating->comment,
+                    'rating' => $rating->rating,
+                    'user_name' => $rating->user->name,
+                    'created_at' => $rating->created_at->format('d.m.Y H:i'),
+                    'stars_html' => $this->generateStarsHtml($rating->rating)
+                ];
+            });
+
+        return response()->json([
+            'success' => true,
+            'comments' => $comments,
+            'total_comments' => $comments->count()
+        ]);
+    }
+
+    /**
+     * Generate stars HTML for rating
+     */
+    private function generateStarsHtml($rating)
+    {
+        $stars = '';
+        $fullStars = floor($rating);
+        $hasHalfStar = ($rating - $fullStars) >= 0.5;
+
+        for ($i = 1; $i <= 5; $i++) {
+            if ($i <= $fullStars) {
+                $stars .= '<i class="fas fa-star text-warning" style="font-size: 0.8rem;"></i>';
+            } elseif ($i == $fullStars + 1 && $hasHalfStar) {
+                $stars .= '<i class="fas fa-star-half-alt text-warning" style="font-size: 0.8rem;"></i>';
+            } else {
+                $stars .= '<i class="far fa-star text-muted" style="font-size: 0.8rem;"></i>';
+            }
+        }
+
+        return $stars;
+    }
 }

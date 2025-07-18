@@ -258,8 +258,9 @@
                                 <small class="text-muted">
                                     <i class="fas fa-map-marker-alt me-1"></i>{{ $merkez->adres }}
                                 </small>
+                                <br>
                             @endif
-                            
+                
                             <!-- Rating Widget -->
                             <div class="rating-widget mt-2" data-merkez-id="{{ $merkez->id }}" onclick="event.stopPropagation()">
                                 <div class="d-flex align-items-center justify-content-between">
@@ -353,6 +354,7 @@
                                 <small class="text-muted">
                                     <i class="fas fa-map-marker-alt me-1"></i>{{ $merkez->adres }}
                                 </small>
+                                <br>
                             @endif
                             
                             <!-- Rating Widget -->

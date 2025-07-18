@@ -57,6 +57,11 @@ Route::prefix('atik-merkezleri/{atikMerkezi}')->middleware('auth')->group(functi
     Route::delete('/favorite', [RatingController::class, 'removeFromFavorites']);
 });
 
+// Comments API Routes (public - no auth required)
+Route::prefix('atik-merkezleri/{atikMerkezi}')->group(function () {
+    Route::get('/comments', [RatingController::class, 'getComments']);
+});
+
 // Eski uyumluluk için - Deprecated
 Route::prefix('v1')->group(function () {
     Route::get('/merkez/{id}', [AtikMerkeziController::class, 'show']);
