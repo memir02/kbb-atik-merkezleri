@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources;
 
+use Filament\Forms\Components\Select;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Forms\Components\TextInput;
 use App\Filament\Resources\UserResource\Pages;
@@ -27,7 +28,11 @@ class UserResource extends Resource
             ->schema([
                 TextInput::make('name')->label('Ad'),
                 TextInput::make('email')->label('Email'),
-                TextInput::make('password')->label('Şifre'),
+                Select::make('roles')
+                ->multiple()
+                ->relationship('roles', 'name')
+                ->preload()
+                ->label('Roller'),
             ]);
     }
 
@@ -38,6 +43,9 @@ class UserResource extends Resource
                 TextColumn::make('name')->label('Ad'),
                 TextColumn::make('email')->label('Email'),
                 TextColumn::make('created_at')->label('Oluşturulma Tarihi')->dateTime('d.m.Y H:i:s '),
+                TextColumn::make('roles.name')
+                ->label('Rol')
+                ->formatStateUsing(fn ($state) => is_array($state) ? implode(', ', $state) : $state)
             ])
             ->filters([
                 //
