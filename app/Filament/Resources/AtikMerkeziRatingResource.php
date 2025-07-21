@@ -1,7 +1,7 @@
 <?php
 
 namespace App\Filament\Resources;
-
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Forms\Components\TextInput;
 use Filament\Tables\Columns\TextColumn;
 use App\Filament\Resources\AtikMerkeziRatingResource\Pages;
@@ -14,6 +14,7 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Filament\Tables\Filters\Filter;
 
 class AtikMerkeziRatingResource extends Resource
 {
@@ -43,7 +44,20 @@ class AtikMerkeziRatingResource extends Resource
                 TextColumn::make('created_at')->label('Oluşturulma Tarihi')->dateTime('d.m.Y H:i:s '),
             ])
             ->filters([
-                //
+                Filter::make('puan_araligi')
+                    ->form([
+                        \Filament\Forms\Components\TextInput::make('min')->label('En Düşük Puan')->numeric(),
+                        \Filament\Forms\Components\TextInput::make('max')->label('En Yüksek Puan')->numeric(),
+                    ])
+                    ->query(function ($query, array $data) {
+                        if ($data['min']) {
+                            $query->where('rating', '>=', $data['min']);
+                        }
+                        if ($data['max']) {
+                            $query->where('rating', '<=', $data['max']);
+                        }
+                    })
+                    ->label('Puan Aralığı'),
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),

@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources;
 
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Forms\Components\Select;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Forms\Components\TextInput;
@@ -48,7 +49,18 @@ class UserResource extends Resource
                 ->formatStateUsing(fn ($state) => is_array($state) ? implode(', ', $state) : $state)
             ])
             ->filters([
-                //
+                    SelectFilter::make('roles')
+                      ->label('Rol')
+                        ->options(
+                     \Spatie\Permission\Models\Role::all()->pluck('name', 'name')->toArray()
+                     )
+                    ->query(function ($query, $data) {
+                 if ($data['value']) {
+                $query->whereHas('roles', function ($q) use ($data) {
+                $q->where('name', $data['value']);
+            });
+        }
+    }), 
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),

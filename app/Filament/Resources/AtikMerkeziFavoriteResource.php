@@ -2,6 +2,8 @@
 
 namespace App\Filament\Resources;
 
+use Filament\Tables\Filters\SelectFilter;
+use App\Models\AtikMerkezi;
 use Filament\Forms\Components\TextInput;
 use Filament\Tables\Columns\TextColumn;
 use App\Filament\Resources\AtikMerkeziFavoriteResource\Pages;
@@ -14,6 +16,7 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use App\Models\User;
 
 class AtikMerkeziFavoriteResource extends Resource
 {
@@ -26,7 +29,7 @@ class AtikMerkeziFavoriteResource extends Resource
         return $form
             ->schema([
                 TextInput::make('user_id')->label('Kullanıcı ID'),
-                TextInput::make('atikMerkezi_id')->label('Merkez ID'),
+                TextInput::make('atik_merkezi_id')->label('Merkez ID'),
             ]);
     }
 
@@ -38,7 +41,18 @@ class AtikMerkeziFavoriteResource extends Resource
                 TextColumn::make('atikMerkezi.title')->label('Merkez Adı'),
             ])
             ->filters([
-                //
+                SelectFilter::make('user_id')
+                    ->label('Kullanıcı')
+                    ->options(
+                        \App\Models\User::all()->pluck('name', 'id')->toArray()
+                    )
+                    ->searchable(),
+                SelectFilter::make('atik_merkezi_id')
+                    ->label('Merkez')
+                    ->options(
+                        AtikMerkezi::all()->pluck('title', 'id')->toArray()
+                    )
+                    ->searchable(),
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
