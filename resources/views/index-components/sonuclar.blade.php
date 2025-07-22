@@ -1,4 +1,4 @@
-{{-- Sonuçlar Component'i - Tam Fonksiyonel --}}
+{{-- Sonuçlar Component'i --}}
 @props(['merkezler' => null, 'tumMerkezler' => null, 'searchTerm' => null, 'isLocationSearch' => false, 'userLat' => null, 'userLon' => null])
 
 {{-- Konuma Göre Sonuçlar --}}

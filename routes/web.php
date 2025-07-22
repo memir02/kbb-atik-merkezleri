@@ -69,6 +69,7 @@ Route::middleware('auth')->group(function () {
     // Rating API Routes
     Route::post('/api/ratings', [RatingController::class, 'submitRating'])->name('api.ratings.submit');
     Route::get('/api/ratings/{atikMerkezi}/user-rating', [RatingController::class, 'getUserRating'])->name('api.ratings.user-rating');
+    Route::delete('/api/ratings/delete', [RatingController::class, 'deleteRating'])->name('api.ratings.delete');
     
     // Favorites API Route
     Route::post('/api/favorites/toggle', [RatingController::class, 'toggleFavorite'])->name('api.favorites.toggle');

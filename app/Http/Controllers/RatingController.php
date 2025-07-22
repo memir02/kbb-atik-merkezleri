@@ -204,4 +204,40 @@ class RatingController extends Controller
 
         return $stars;
     }
+
+    /**
+     * Delete user's own rating
+     */
+    public function deleteRating(Request $request)
+    {
+        $request->validate([
+            'rating_id' => 'required|exists:atik_merkezi_ratings,id'
+        ]);
+
+        $rating = AtikMerkeziRating::where([
+            'id' => $request->rating_id,
+            'user_id' => Auth::id()
+        ])->first();
+
+        if (!$rating) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Yorum bulunamadı veya silme yetkiniz yok'
+            ], 404);
+        }
+
+        $atikMerkezi = $rating->atikMerkezi;
+        $rating->delete();
+
+        // Get updated statistics for the merkez
+        $averageRating = $atikMerkezi->ratings()->avg('rating') ?: 0;
+        $totalRatings = $atikMerkezi->ratings()->count();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Yorumunuz başarıyla silindi',
+            'average_rating' => round($averageRating, 1),
+            'total_ratings' => $totalRatings
+        ]);
+    }
 }
