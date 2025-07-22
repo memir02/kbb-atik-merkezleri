@@ -6,7 +6,11 @@ use Illuminate\Database\Eloquent\Model;
 
 class AtikMerkeziRating extends Model
 {
-    protected $fillable = ['user_id', 'atik_merkezi_id', 'rating', 'comment'];
+    protected $fillable = ['user_id', 'atik_merkezi_id', 'rating', 'comment', 'is_approved'];
+
+    protected $casts = [
+        'is_approved' => 'boolean',
+    ];
 
     public function user()
     {

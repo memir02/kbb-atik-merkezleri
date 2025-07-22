@@ -19,7 +19,7 @@ class RatingController extends Controller
 
         $rating = AtikMerkeziRating::updateOrCreate(
             ['user_id' => Auth::id(), 'atik_merkezi_id' => $atikMerkezi->id],
-            ['rating' => $request->rating, 'comment' => $request->comment]
+            ['rating' => $request->rating, 'comment' => $request->comment, 'is_approved' => false]
         );
 
         // Get updated statistics
@@ -75,7 +75,7 @@ class RatingController extends Controller
 
         $rating = AtikMerkeziRating::updateOrCreate(
             ['user_id' => Auth::id(), 'atik_merkezi_id' => $atikMerkezi->id],
-            ['rating' => $request->rating, 'comment' => $request->comment]
+            ['rating' => $request->rating, 'comment' => $request->comment, 'is_approved' => false]
         );
 
         // Get updated statistics
@@ -161,6 +161,7 @@ class RatingController extends Controller
         $comments = $atikMerkezi->ratings()
             ->whereNotNull('comment')
             ->where('comment', '!=', '')
+            ->where('is_approved', true)
             ->with('user:id,name')
             ->orderBy('created_at', 'desc')
             ->get()

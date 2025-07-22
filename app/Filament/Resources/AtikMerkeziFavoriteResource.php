@@ -22,14 +22,28 @@ class AtikMerkeziFavoriteResource extends Resource
 {
     protected static ?string $model = AtikMerkeziFavorite::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-heart';
+    
+    protected static ?string $navigationLabel = 'Favoriler';
+    
+    protected static ?string $modelLabel = 'Favori';
+    
+    protected static ?string $pluralModelLabel = 'Favoriler';
 
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
-                TextInput::make('user_id')->label('Kullanıcı ID'),
-                TextInput::make('atik_merkezi_id')->label('Merkez ID'),
+                \Filament\Forms\Components\Select::make('user_id')
+                    ->label('Kullanıcı')
+                    ->relationship('user', 'name')
+                    ->searchable()
+                    ->required(),
+                \Filament\Forms\Components\Select::make('atik_merkezi_id')
+                    ->label('Atık Merkezi')
+                    ->relationship('atikMerkezi', 'title')
+                    ->searchable()
+                    ->required(),
             ]);
     }
 
@@ -37,30 +51,75 @@ class AtikMerkeziFavoriteResource extends Resource
     {
         return $table
             ->columns([
-                TextColumn::make('user.name')->label('Kullanıcı Adı'),
-                TextColumn::make('atikMerkezi.title')->label('Merkez Adı'),
+                \Filament\Tables\Columns\TextColumn::make('id')
+                    ->label('ID')
+                    ->sortable(),
+                \Filament\Tables\Columns\TextColumn::make('user.name')
+                    ->label('Kullanıcı')
+                    ->searchable()
+                    ->sortable()
+                    ->icon('heroicon-o-user'),
+                \Filament\Tables\Columns\TextColumn::make('atikMerkezi.title')
+                    ->label('Atık Merkezi')
+                    ->searchable()
+                    ->sortable()
+                    ->limit(40)
+                    ->tooltip(function (TextColumn $column): ?string {
+                        $state = $column->getState();
+                        if (strlen($state) <= 40) {
+                            return null;
+                        }
+                        return $state;
+                    })
+                    ->icon('heroicon-o-building-office'),
+                \Filament\Tables\Columns\TextColumn::make('atikMerkezi.adres')
+                    ->label('Adres')
+                    ->limit(50)
+                    ->tooltip(function (TextColumn $column): ?string {
+                        $state = $column->getState();
+                        if (strlen($state) <= 50) {
+                            return null;
+                        }
+                        return $state;
+                    })
+                    ->icon('heroicon-o-map-pin')
+                    ->toggleable(isToggledHiddenByDefault: true),
+                \Filament\Tables\Columns\TextColumn::make('created_at')
+                    ->label('Eklenme Tarihi')
+                    ->dateTime('d.m.Y H:i')
+                    ->sortable()
+                    ->icon('heroicon-o-heart'),
+                \Filament\Tables\Columns\TextColumn::make('updated_at')
+                    ->label('Güncellenme')
+                    ->dateTime('d.m.Y H:i')
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+            ])
+            ->defaultSort('created_at', 'desc')
+            ->actions([
+                \Filament\Tables\Actions\EditAction::make(),
+                \Filament\Tables\Actions\DeleteAction::make(),
+            ])
+            ->bulkActions([
+                \Filament\Tables\Actions\BulkActionGroup::make([
+                    \Filament\Tables\Actions\DeleteBulkAction::make(),
+                ]),
             ])
             ->filters([
                 SelectFilter::make('user_id')
                     ->label('Kullanıcı')
-                    ->options(
-                        \App\Models\User::all()->pluck('name', 'id')->toArray()
-                    )
+                    ->relationship('user', 'name')
                     ->searchable(),
                 SelectFilter::make('atik_merkezi_id')
-                    ->label('Merkez')
-                    ->options(
-                        AtikMerkezi::all()->pluck('title', 'id')->toArray()
-                    )
+                    ->label('Atık Merkezi')
+                    ->relationship('atikMerkezi', 'title')
                     ->searchable(),
-            ])
-            ->actions([
-                Tables\Actions\EditAction::make(),
-            ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
-                ]),
+                \Filament\Tables\Filters\Filter::make('recent')
+                    ->label('Son 30 Gün')
+                    ->query(fn (Builder $query): Builder => $query->where('created_at', '>=', now()->subDays(30))),
+                \Filament\Tables\Filters\Filter::make('this_month')
+                    ->label('Bu Ay')
+                    ->query(fn (Builder $query): Builder => $query->whereMonth('created_at', now()->month)),
             ]);
     }
 
@@ -78,5 +137,10 @@ class AtikMerkeziFavoriteResource extends Resource
             'create' => Pages\CreateAtikMerkeziFavorite::route('/create'),
             'edit' => Pages\EditAtikMerkeziFavorite::route('/{record}/edit'),
         ];
+    }
+    
+    public static function getNavigationBadge(): ?string
+    {
+        return static::getModel()::count();
     }
 }

@@ -20,16 +20,45 @@ class AtikMerkeziRatingResource extends Resource
 {
     protected static ?string $model = AtikMerkeziRating::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-star';
+    
+    protected static ?string $navigationLabel = 'Değerlendirmeler';
+    
+    protected static ?string $modelLabel = 'Değerlendirme';
+    
+    protected static ?string $pluralModelLabel = 'Değerlendirmeler';
 
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
-                TextInput::make('user_id')->label('Kullanıcı ID'),
-                TextInput::make('atik_merkezi_id')->label('Merkez ID'),
-                TextInput::make('rating')->label('Puan'),
-                TextInput::make('comment')->label('Yorum'),
+                \Filament\Forms\Components\Select::make('user_id')
+                    ->label('Kullanıcı')
+                    ->relationship('user', 'name')
+                    ->searchable()
+                    ->required(),
+                \Filament\Forms\Components\Select::make('atik_merkezi_id')
+                    ->label('Atık Merkezi')
+                    ->relationship('atikMerkezi', 'title')
+                    ->searchable()
+                    ->required(),
+                \Filament\Forms\Components\Select::make('rating')
+                    ->label('Puan')
+                    ->options([
+                        1 => '⭐ (1 Yıldız)',
+                        2 => '⭐⭐ (2 Yıldız)',
+                        3 => '⭐⭐⭐ (3 Yıldız)',
+                        4 => '⭐⭐⭐⭐ (4 Yıldız)',
+                        5 => '⭐⭐⭐⭐⭐ (5 Yıldız)',
+                    ])
+                    ->required(),
+                \Filament\Forms\Components\Textarea::make('comment')
+                    ->label('Yorum')
+                    ->rows(3)
+                    ->maxLength(1000),
+                \Filament\Forms\Components\Toggle::make('is_approved')
+                    ->label('Onaylı mı?')
+                    ->default(false),
             ]);
     }
 
@@ -37,35 +66,112 @@ class AtikMerkeziRatingResource extends Resource
     {
         return $table
             ->columns([
-                TextColumn::make('user.name')->label('Kullanıcı Adı'),
-                TextColumn::make('atikMerkezi.title')->label('Merkez Adı'),
-                TextColumn::make('rating')->label('Puan'),
-                TextColumn::make('comment')->label('Yorum'),
-                TextColumn::make('created_at')->label('Oluşturulma Tarihi')->dateTime('d.m.Y H:i:s '),
-            ])
-            ->filters([
-                Filter::make('puan_araligi')
-                    ->form([
-                        \Filament\Forms\Components\TextInput::make('min')->label('En Düşük Puan')->numeric(),
-                        \Filament\Forms\Components\TextInput::make('max')->label('En Yüksek Puan')->numeric(),
-                    ])
-                    ->query(function ($query, array $data) {
-                        if ($data['min']) {
-                            $query->where('rating', '>=', $data['min']);
+                \Filament\Tables\Columns\TextColumn::make('id')
+                    ->label('ID')
+                    ->sortable(),
+                \Filament\Tables\Columns\TextColumn::make('user.name')
+                    ->label('Kullanıcı')
+                    ->searchable()
+                    ->sortable()
+                    ->icon('heroicon-o-user'),
+                \Filament\Tables\Columns\TextColumn::make('atikMerkezi.title')
+                    ->label('Atık Merkezi')
+                    ->searchable()
+                    ->sortable()
+                    ->limit(30)
+                    ->tooltip(function (TextColumn $column): ?string {
+                        $state = $column->getState();
+                        if (strlen($state) <= 30) {
+                            return null;
                         }
-                        if ($data['max']) {
-                            $query->where('rating', '<=', $data['max']);
-                        }
+                        return $state;
                     })
-                    ->label('Puan Aralığı'),
+                    ->icon('heroicon-o-building-office'),
+                \Filament\Tables\Columns\TextColumn::make('rating')
+                    ->label('Puan')
+                    ->sortable()
+                    ->formatStateUsing(fn (string $state): string => str_repeat('⭐', (int) $state) . " ({$state}/5)")
+                    ->color(fn (string $state): string => match ((int) $state) {
+                        1, 2 => 'danger',
+                        3 => 'warning',
+                        4, 5 => 'success',
+                        default => 'gray',
+                    }),
+                \Filament\Tables\Columns\TextColumn::make('comment')
+                    ->label('Yorum')
+                    ->limit(50)
+                    ->tooltip(function (TextColumn $column): ?string {
+                        $state = $column->getState();
+                        if (strlen($state) <= 50) {
+                            return null;
+                        }
+                        return $state;
+                    })
+                    ->searchable(),
+                \Filament\Tables\Columns\IconColumn::make('is_approved')
+                    ->label('Onay Durumu')
+                    ->boolean()
+                    ->trueIcon('heroicon-o-check-circle')
+                    ->falseIcon('heroicon-o-x-circle')
+                    ->trueColor('success')
+                    ->falseColor('danger'),
+                \Filament\Tables\Columns\TextColumn::make('created_at')
+                    ->label('Oluşturulma')
+                    ->dateTime('d.m.Y H:i')
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                \Filament\Tables\Columns\TextColumn::make('updated_at')
+                    ->label('Güncellenme')
+                    ->dateTime('d.m.Y H:i')
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
             ])
+            ->defaultSort('created_at', 'desc')
             ->actions([
-                Tables\Actions\EditAction::make(),
+                \Filament\Tables\Actions\EditAction::make(),
+                \Filament\Tables\Actions\DeleteAction::make(),
             ])
             ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+                \Filament\Tables\Actions\BulkActionGroup::make([
+                    \Filament\Tables\Actions\DeleteBulkAction::make(),
+                    \Filament\Tables\Actions\BulkAction::make('approve')
+                        ->label('Seçilileri Onayla')
+                        ->action(fn (\Illuminate\Support\Collection $records) => $records->each->update(['is_approved' => true]))
+                        ->icon('heroicon-o-check')
+                        ->color('success')
+                        ->requiresConfirmation(),
+                    \Filament\Tables\Actions\BulkAction::make('reject')
+                        ->label('Seçilileri Reddet')
+                        ->action(fn (\Illuminate\Support\Collection $records) => $records->each->update(['is_approved' => false]))
+                        ->icon('heroicon-o-x-mark')
+                        ->color('danger')
+                        ->requiresConfirmation(),
                 ]),
+            ])
+            ->filters([
+                \Filament\Tables\Filters\SelectFilter::make('is_approved')
+                    ->label('Onay Durumu')
+                    ->options([
+                        1 => 'Onaylı',
+                        0 => 'Onaysız',
+                    ]),
+                \Filament\Tables\Filters\SelectFilter::make('rating')
+                    ->label('Puan')
+                    ->options([
+                        1 => '⭐ (1 Yıldız)',
+                        2 => '⭐⭐ (2 Yıldız)',
+                        3 => '⭐⭐⭐ (3 Yıldız)',
+                        4 => '⭐⭐⭐⭐ (4 Yıldız)',
+                        5 => '⭐⭐⭐⭐⭐ (5 Yıldız)',
+                    ]),
+                \Filament\Tables\Filters\SelectFilter::make('user_id')
+                    ->label('Kullanıcı')
+                    ->relationship('user', 'name')
+                    ->searchable(),
+                \Filament\Tables\Filters\SelectFilter::make('atik_merkezi_id')
+                    ->label('Atık Merkezi')
+                    ->relationship('atikMerkezi', 'title')
+                    ->searchable(),
             ]);
     }
 

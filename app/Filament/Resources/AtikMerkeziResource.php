@@ -19,7 +19,13 @@ class AtikMerkeziResource extends Resource
 {
     protected static ?string $model = AtikMerkezi::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-building-office';
+    
+    protected static ?string $navigationLabel = 'Atık Merkezleri';
+    
+    protected static ?string $modelLabel = 'Atık Merkezi';
+    
+    protected static ?string $pluralModelLabel = 'Atık Merkezleri';
 
     public static function form(Form $form): Form
     {
