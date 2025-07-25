@@ -15,6 +15,26 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <!-- Atık Merkezleri Custom CSS -->
     <link rel="stylesheet" href="{{ asset('css/atik-merkezleri.css') }}">
+    
+    <!-- Yorum metinleri için acil CSS düzeltmesi -->
+    <style>
+        .comment-item .comment-text {
+            color: #ffffff !important;
+            background-color: rgba(13, 110, 253, 0.15) !important;
+            padding: 0.75rem !important;
+            border-radius: 0.375rem !important;
+            border-left: 4px solid #0d6efd !important;
+            border: 1px solid rgba(13, 110, 253, 0.4) !important;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2) !important;
+            line-height: 1.5 !important;
+            margin-top: 0.5rem !important;
+        }
+        .modal .comment-item .comment-text,
+        #yorum-content-inner .comment-item .comment-text {
+            color: #ffffff !important;
+            background-color: rgba(13, 110, 253, 0.15) !important;
+        }
+    </style>
 </head>
 <body>
 

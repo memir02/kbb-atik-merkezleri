@@ -490,11 +490,15 @@ export class ModalModule {
                                 <div class="stars-display">
                                     ${comment.stars_html}
                                 </div>
-                                <span class="user-name">${comment.user_name}</span>
+                                <span class="user-name">
+                                    <i class="fas fa-user-circle me-1"></i>${comment.user_name}
+                                </span>
                             </div>
-                            <span class="comment-date">${comment.created_at}</span>
+                            <span class="comment-date">
+                                <i class="fas fa-clock me-1"></i>${comment.created_at}
+                            </span>
                         </div>
-                        <p class="comment-text mb-0">${comment.comment}</p>
+                        <p class="comment-text mb-0" style="color: #ffffff !important; background-color: rgba(13, 110, 253, 0.15) !important; padding: 0.75rem !important; border-radius: 0.375rem !important; border-left: 4px solid #0d6efd !important; border: 1px solid rgba(13, 110, 253, 0.4) !important;">${comment.comment}</p>
                     </div>
                 `;
             });
@@ -560,11 +564,15 @@ export class ModalModule {
                                 <div class="stars-display">
                                     ${comment.stars_html}
                                 </div>
-                                <span class="user-name">${comment.user_name}</span>
+                                <span class="user-name">
+                                    <i class="fas fa-user-circle me-1"></i>${comment.user_name}
+                                </span>
                             </div>
-                            <span class="comment-date">${comment.created_at}</span>
+                            <span class="comment-date">
+                                <i class="fas fa-clock me-1"></i>${comment.created_at}
+                            </span>
                         </div>
-                        <p class="comment-text mb-0">${comment.comment}</p>
+                        <p class="comment-text mb-0" style="color: #ffffff !important; background-color: rgba(13, 110, 253, 0.15) !important; padding: 0.75rem !important; border-radius: 0.375rem !important; border-left: 4px solid #0d6efd !important; border: 1px solid rgba(13, 110, 253, 0.4) !important;">${comment.comment}</p>
                     </div>
                 `;
             });

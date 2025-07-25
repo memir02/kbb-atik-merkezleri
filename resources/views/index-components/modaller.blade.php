@@ -154,6 +154,21 @@
               <!-- Yorumlar JS ile buraya gelecek -->
             </div>
           </div>
+          
+          <!-- Yorum metinleri için inline CSS -->
+          <style>
+            .comment-item .comment-text {
+              color: #ffffff !important;
+              background-color: rgba(13, 110, 253, 0.15) !important;
+              padding: 0.75rem !important;
+              border-radius: 0.375rem !important;
+              border-left: 4px solid #0d6efd !important;
+              border: 1px solid rgba(13, 110, 253, 0.4) !important;
+              box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2) !important;
+              line-height: 1.5 !important;
+              margin-top: 0.5rem !important;
+            }
+          </style>
         </div>
       </div>
     </div>

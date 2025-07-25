@@ -332,24 +332,76 @@ footer {
     font-weight: normal;
 }
 
+/* Yorumlar için güçlü stiller */
+.comment-item,
+.comments-container .comment-item,
+#yorum-content-inner .comment-item {
+    background-color: #f8f9fa !important;
+    border: 1px solid #dee2e6 !important;
+    border-radius: 0.375rem !important;
+    padding: 0.75rem !important;
+    margin-bottom: 0.75rem !important;
+    transition: all 0.2s ease !important;
+}
+
+.comment-item:hover,
+.comments-container .comment-item:hover,
+#yorum-content-inner .comment-item:hover {
+    background-color: #e9ecef !important;
+    border-color: #0d6efd !important;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important;
+}
+
+.comment-item:last-child,
+.comments-container .comment-item:last-child,
+#yorum-content-inner .comment-item:last-child {
+    margin-bottom: 0 !important;
+}
+
 .comment-item .stars-display {
-    margin-right: 0.5rem;
+    margin-right: 0.5rem !important;
 }
 
-.comment-item .user-name {
-    font-weight: 600;
-    color: #495057;
+.comment-item .user-name,
+.comments-container .comment-item .user-name,
+#yorum-content-inner .comment-item .user-name {
+    font-weight: 700 !important;
+    color: #0d6efd !important;
+    font-size: 0.9rem !important;
+    text-decoration: none !important;
 }
 
-.comment-item .comment-date {
-    font-size: 0.75rem;
-    color: #6c757d;
+.comment-item .user-name:hover,
+.comments-container .comment-item .user-name:hover,
+#yorum-content-inner .comment-item .user-name:hover {
+    color: #0a58ca !important;
+    text-decoration: underline !important;
 }
 
-.comment-item .comment-text {
-    color: #495057;
-    line-height: 1.5;
-    margin-top: 0.5rem;
+.comment-item .comment-date,
+.comments-container .comment-item .comment-date,
+#yorum-content-inner .comment-item .comment-date {
+    font-size: 0.75rem !important;
+    color: #6c757d !important;
+    font-style: italic !important;
+}
+
+/* En güçlü CSS seçicileri ile yorum metni stilini zorla uygula - v2.0 - 2025.01.16 */
+div.comment-item p.comment-text,
+div.comments-container div.comment-item p.comment-text,
+#yorum-content-inner div.comment-item p.comment-text,
+.modal-body .comment-item .comment-text,
+.modal .comment-item .comment-text {
+    color: #ffffff !important;
+    line-height: 1.5 !important;
+    margin-top: 0.5rem !important;
+    background-color: rgba(13, 110, 253, 0.15) !important;
+    padding: 0.75rem !important;
+    border-radius: 0.375rem !important;
+    border-left: 4px solid #0d6efd !important;
+    font-style: normal !important;
+    border: 1px solid rgba(13, 110, 253, 0.4) !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2) !important;
 }
 
 /* Multiple merkez detay modal'ında yorumlar için daha kompakt stil */
@@ -360,11 +412,20 @@ footer {
 .modal-body .comment-item {
     padding: 0.5rem;
     margin-bottom: 0.5rem;
-    font-size: 0.9rem;
+    font-size: 0.85rem;
 }
 
 .modal-body .comment-item:last-child {
     margin-bottom: 0;
+}
+
+.modal-body .comment-item .comment-text {
+    padding: 0.375rem;
+    font-size: 0.8rem;
+}
+
+.modal-body .comment-item .user-name {
+    font-size: 0.8rem;
 }
 
 /* Yorum yokken gösterilen mesaj */
