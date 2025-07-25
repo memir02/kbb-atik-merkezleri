@@ -28,6 +28,7 @@ class AdminPanelProvider extends PanelProvider
             ->path('admin')
             ->login()
             ->brandName('Atık Merkezleri Yönetim Paneli')
+            ->favicon(asset('favicon.png'))
             ->brandLogo(fn () => view('filament.brand-logo'))
             ->colors([
                 'primary' => Color::Amber,
